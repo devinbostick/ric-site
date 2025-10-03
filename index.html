@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resonance Intelligence Core</title>
+  <meta name="description" content="Deterministic emission at the substrate. Replayable legality." />
+  <style>
+    :root { --fg:#111; --muted:#6b7280; --bg:#fff; --border:#e5e7eb; }
+    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+    header,main,footer{max-width:960px;margin:0 auto;padding:24px}
+    .hero{padding:72px 24px 24px;text-align:center}
+    .h1{font-size:clamp(32px,6vw,56px);font-weight:800;letter-spacing:-.02em;color:var(--fg)}
+    .lead{margin-top:12px;color:var(--muted);font-size:18px}
+    .row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 16px;border:1px solid var(--fg);border-radius:10px;text-decoration:none}
+    .btn.primary{background:#000;color:#fff}
+    .btn:hover{opacity:.9}
+    .note{margin-top:8px;font-size:13px;color:var(--muted)}
+    .card{border:1px solid var(--border);border-radius:14px;padding:16px}
+    pre{background:#0a0a0a;color:#fff;border-radius:12px;padding:16px;overflow:auto}
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+    footer{color:var(--muted);font-size:14px;text-align:center;padding:40px 24px}
+    .email{display:flex;gap:8px;justify-content:center;margin-top:12px}
+    input[type=email]{padding:12px;border:1px solid var(--border);border-radius:10px;min-width:260px}
+  </style>
+</head>
+<body>
+  <header></header>
+
+  <main>
+    <section class="hero">
+      <h1 class="h1">Resonance Intelligence Core</h1>
+      <p class="lead">Deterministic emission at the substrate. Replayable legality.</p>
+
+      <div class="row">
+        <a class="btn primary" href="/artifacts/contract-bundle.json" download>Download: Contract bundle</a>
+        <a class="btn" href="/artifacts/compliance-bundle.json" download>Download: Compliance bundle</a>
+      </div>
+      <p class="note">Bundles are signed (Ed25519) and include claims + provenance.</p>
+    </section>
+
+    <section class="grid" style="margin-top:28px">
+      <div class="card">
+        <h3>Verify locally</h3>
+        <p class="note">Use the <code>ric-verify</code> CLI from <code>ric-core-2</code> to validate signature + claims:</p>
+<pre><code># from ric-core-2
+./dist/cli/verify.js artifacts/contract-bundle.json --json | jq -e '.signature.status=="verified"'
+</code></pre>
+      </div>
+      <div class="card">
+        <h3>What’s inside</h3>
+        <p class="note">Q32 fixed-point core; PAS/ΔPAS (O(1)); TEMPOLOCK; GLYPHLOCK; AURA_OUT; ELF loop; LockGraph (graphHash + bundleHash) with claims & provenance.</p>
+      </div>
+      <div class="card">
+        <h3>API & SDK</h3>
+        <p class="note">Self-hostable API on <code>:8787</code> and a TypeScript SDK for programmatic use. Deterministic golden tests keep behavior stable.</p>
+      </div>
+      <div class="card">
+        <h3>Docs / Demos</h3>
+        <p class="note">Contract (PASS) and Compliance (FAIL) demo bundles above show end-to-end signing and offline verification.</p>
+      </div>
+    </section>
+
+    <section style="text-align:center;margin-top:40px">
+      <h3>Launching soon — want updates?</h3>
+      <form class="email" action="mailto:hello@resonanceintelligencecore.com" method="post" enctype="text/plain">
+        <input type="email" name="email" placeholder="you@email.com" required />
+        <button class="btn primary" type="submit">Notify me</button>
+      </form>
+      <p class="note">Replace mailto with your provider later (Vercel Function / Resend / Beehiiv / ConvertKit).</p>
+    </section>
+  </main>
+
+  <footer>© <span id="y"></span> Resonance Intelligence Core</footer>
+  <script>document.getElementById('y').textContent = new Date().getFullYear()</script>
+</body>
+</html>
