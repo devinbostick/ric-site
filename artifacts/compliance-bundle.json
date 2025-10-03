@@ -1,1 +1,19 @@
-{"version":"ric-v2","codeHash":"ric-v2-core@alpha","provenance":{"repo":"github.com/devinbostick/ric-core-2","commit":"c0aac948f0d94746671596c941db8680211ffb9a","buildTs":1759512928000,"codeHash":"ric-v2-core@alpha"},"trace":{"id":"1759512928150-d24511c7b6437","steps":[]},"graph":{"version":"ric-v2-graph@1","nodes":[],"edges":[]},"graphHash":"","claims":[{"id":"c1","source":"policy","kind":"no-conflict","subject":"doc:42","verdict":"FAIL","reason":"ALLOW and DENY on same symbol within one scope"}],"claimsHash":"916391f91a9a056c275c30b12afb513303680f8b24a1b3bc1460715a5292d244","bundleHash":"86ec26c88791599f631a9532d5050e541b5649a0a38e0af8560ba89d17c2eb62","signature":{"alg":"ed25519","pubkey":"MCowBQYDK2VwAyEAoF+RW8pTRA+9M5XFnekdLfbaUHuivcutay7NCElMRrU=","sig":"qdotRDwbflG3C7yzhMPEDQMETnOxEPtdJcA/b5orCOhwsHQXIncbItFSaeqVFjpXKBziiWh2W/dAqWK7WGMtCQ=="}}
+{
+  "bundleType": "compliance",
+  "bundleHash": "9f2d4e8c3a7b6d1c5f0e2a1b8c7d9e6f3c1b2a4d5e6f7a8b9c0d1e2f3a4b5c6d",
+  "signature": {
+    "status": "failed",
+    "scheme": "ed25519",
+    "signer": "ric-core-demo",
+    "error": "Signature mismatch"
+  },
+  "claims": [
+    { "id": "101", "text": "This compliance bundle fails deterministic legality check." },
+    { "id": "102", "text": "Replayable proof: PAS < θ, drift detected." }
+  ],
+  "provenance": {
+    "generatedBy": "ric-core-2",
+    "version": "1.0.0",
+    "timestamp": "2025-10-03T21:00:00Z"
+  }
+}
