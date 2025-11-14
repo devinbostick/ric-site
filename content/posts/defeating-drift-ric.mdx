@@ -1,0 +1,35 @@
+---
+title: "Defeating Drift at the Substrate: Deterministic Emission with RIC"
+date: "2025-09-12"
+summary: "Batch-invariant kernels reduce variance in LLM endpoints; RIC removes the probabilistic root with legality-first emission."
+tags:
+  - determinism
+  - RIC
+  - PAS
+  - TEMPOLOCK
+---
+
+**TL;DR**  
+LLM drift persists due to probabilistic inference + batch-dependent numerics. Batch-invariance patches numerics; **RIC** enforces legality-first emission (FIELDCAST → CHORDLOCK → PAS_s → ΔPAS_zeta → TEMPOLOCK → AURA_OUT → Phase Memory), yielding bitwise-stable, replayable outputs.
+
+## 1) Problem
+<Figure src="/img/ric-determinism/fig1-uniques.svg" caption="Unique completions vs samples (t=0)" />
+
+## 2) Batch-invariance vs substrate
+- Patches: fix kernel order; probabilistic sampling remains.
+- Substrate: remove sampling; gate emission by legality.
+
+## 3) RIC method
+Emit iff `PAS_s ≥ theta_legal ∧ ΔPAS_zeta ≤ epsilon_drift ∧ TEMPOLOCK=open`.
+
+## 4) Results
+<Figure src="/img/ric-determinism/fig2-first-divergence-cdf.svg" caption="First divergence CDF" />
+<Figure src="/img/ric-determinism/fig3-reward.svg" caption="Reward trajectory" />
+<Figure src="/img/ric-determinism/fig4-klzero.svg" caption="True on-policy: KL≈0" />
+<Figure src="/img/ric-determinism/fig5-pas-stability.svg" caption="PAS_s stability" />
+<Figure src="/img/ric-determinism/fig6-zeta.svg" caption="ΔPAS_zeta drift control" />
+<Figure src="/img/ric-determinism/fig7-hash.svg" caption="Replay hash match" />
+
+## Reproducibility
+- Docker + scripts produce figures and hashes.
+- Publish commit hashes and expected checksums.
