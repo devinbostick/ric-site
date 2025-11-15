@@ -1,15 +1,13 @@
-// app/api/demo-run/route.ts
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import crypto from "node:crypto";
 
-type DemoRequestBody = {
-  claim: any;
-  question: string;
-};
-
-type DemoDecision = {
-  decision: "PASS" | "HALT";
-  reason: string | null;
+type Claim = {
+  policy_effective_date: string; // "YYYY-MM-DD"
+  coverage_window_days: number;
+  loss_date: string;
+  report_date: string;
+  damage_type: string;
 };
 
 type DemoResponse = {
@@ -22,146 +20,87 @@ type DemoResponse = {
   claude?: { text: string };
 };
 
-// ------------------------
-// Deterministic gating (temporal law)
-// ------------------------
-function evaluateClaim(claim: any): DemoDecision {
-  const effective = claim?.policy_effective_date;
-  const windowDays = claim?.coverage_window_days;
-  const lossDate = claim?.loss_date;
-  const reportDate = claim?.report_date;
+const VERSION = "0.1.0";
 
-  if (!effective || !windowDays || !lossDate || !reportDate) {
-    return {
-      decision: "HALT",
-      reason:
-        "Missing expected fields for demo (policy_effective_date, coverage_window_days, loss_date, report_date).",
-    };
-  }
+function daysBetween(a: Date, b: Date): number {
+  const msPerDay = 24 * 60 * 60 * 1000;
+  return Math.round((b.getTime() - a.getTime()) / msPerDay);
+}
 
-  const coverageWindow = Number(windowDays);
-  const eff = new Date(effective);
-  const loss = new Date(lossDate);
-  const report = new Date(reportDate);
+function hash256(payload: string): string {
+  return crypto.createHash("sha256").update(payload).digest("hex");
+}
 
-  const msPerDay = 1000 * 60 * 60 * 24;
-  const daysFromEffectiveToLoss = (loss.getTime() - eff.getTime()) / msPerDay;
-  const daysFromLossToReport = (report.getTime() - loss.getTime()) / msPerDay;
+function gateClaim(
+  claim: Claim,
+): { decision: "PASS" | "HALT"; reason: string | null } {
+  const start = new Date(claim.policy_effective_date);
+  const loss = new Date(claim.loss_date);
+  const report = new Date(claim.report_date);
+  const windowDays = claim.coverage_window_days;
 
-  if (Number.isNaN(coverageWindow)) {
-    return {
-      decision: "HALT",
-      reason: "coverage_window_days must be numeric.",
-    };
-  }
-
-  if (loss < eff) {
+  // 1) Loss must not be before policy start
+  if (loss.getTime() < start.getTime()) {
     return {
       decision: "HALT",
       reason: "Loss date is before policy effective date.",
     };
   }
 
-  if (daysFromEffectiveToLoss > coverageWindow) {
+  // 2) Loss must be within coverage window from policy start
+  const daysFromStartToLoss = daysBetween(start, loss);
+  if (daysFromStartToLoss > windowDays) {
     return {
       decision: "HALT",
-      reason: `Loss ${Math.round(
-        daysFromEffectiveToLoss,
-      )} days after policy start exceeds coverage window of ${coverageWindow} days.`,
+      reason: `Loss ${daysFromStartToLoss} days after policy start exceeds coverage window of ${windowDays} days.`,
     };
   }
 
-  if (daysFromLossToReport < 0) {
+  // 3) Report must be within coverage window from loss
+  const daysLossToReport = daysBetween(loss, report);
+  if (daysLossToReport > windowDays) {
     return {
       decision: "HALT",
-      reason: "Report date is before loss date.",
+      reason: `Report ${daysLossToReport} days after loss exceeds coverage window of ${windowDays} days.`,
     };
   }
 
-  if (daysFromLossToReport > coverageWindow) {
-    return {
-      decision: "HALT",
-      reason: `Report ${Math.round(
-        daysFromLossToReport,
-      )} days after loss exceeds coverage window of ${coverageWindow} days.`,
-    };
-  }
-
-  return {
-    decision: "PASS",
-    reason: null,
-  };
+  return { decision: "PASS", reason: null };
 }
 
-// ------------------------
-// RIC v2 client
-// ------------------------
+async function callRicCore(payload: any): Promise<any> {
+  const base = process.env.RIC_URL || "http://localhost:8787";
 
-const ricUrl = process.env.RIC_URL ?? "http://localhost:8787";
-
-type RicRunResult = {
-  id: string;
-  emitted: number;
-  bundle: any; // use the exact shape if you want stronger typing
-};
-
-async function runRicSubstrate(payload: {
-  claim: any;
-  question: string;
-}): Promise<RicRunResult> {
-  // This shape assumes RIC /run takes windows/symbols/primes; adjust to match server/api.ts
-  const body = {
-    windows: [
-      {
-        id: "w1",
-        // Pack claim/question as symbols for now; this is enough for the demo
-        meta: { kind: "legal-claim-demo" },
-      },
-    ],
-    symbols: [
-      JSON.stringify(payload.claim),
-      payload.question,
-    ],
-    primes: [7, 11],
-  };
-
-  const res = await fetch(`${ricUrl}/run`, {
+  const res = await fetch(`${base}/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
     throw new Error(`RIC /run HTTP ${res.status}: ${await res.text()}`);
   }
 
-  const json = (await res.json()) as RicRunResult;
-  return json;
+  return res.json();
 }
 
-// ------------------------
-// Claude client for gated path
-// ------------------------
-const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
-const anthropicModel =
-  process.env.ANTHROPIC_MODEL ?? "claude-3-5-sonnet-20241022";
+async function callClaude(claim: Claim, question: string): Promise<string> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const model = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-latest";
 
-const anthropic =
-  anthropicApiKey != null
-    ? new Anthropic({ apiKey: anthropicApiKey })
-    : null;
-
-async function runClaudeGated(claim: any, question: string): Promise<string> {
-  if (!anthropic) {
-    return (
-      "ANTHROPIC_API_KEY is not set in the environment. " +
-      "This is a demo fallback text.\n\n" +
-      `Claim: ${JSON.stringify(claim, null, 2)}\nQuestion: ${question}`
-    );
+  if (!apiKey) {
+    return [
+      "Set ANTHROPIC_API_KEY in the environment to call Claude.\n",
+      "Stub response for demo:",
+      `Claim: ${JSON.stringify(claim)}`,
+      `Question: ${question}`,
+    ].join("\n");
   }
 
+  const anthropic = new Anthropic({ apiKey });
+
   const msg = await anthropic.messages.create({
-    model: anthropicModel,
+    model,
     max_tokens: 512,
     temperature: 0,
     messages: [
@@ -171,71 +110,77 @@ async function runClaudeGated(claim: any, question: string): Promise<string> {
           {
             type: "text",
             text:
-              "You are an insurance coverage analyst. " +
-              "This call ONLY happens because the deterministic substrate passed the claim.\n\n" +
-              "Claim JSON:\n" +
-              JSON.stringify(claim, null, 2) +
-              "\n\nQuestion:\n" +
-              question +
-              "\n\nExplain your reasoning and then give a clear YES/NO at the top.",
+              "You are an insurance claims analyst. " +
+              "Given a structured JSON claim and a question, answer carefully.\n\n" +
+              `Claim JSON:\n${JSON.stringify(claim, null, 2)}\n\n` +
+              `Question: ${question}\n\n` +
+              "Explain your reasoning step by step, then give a clear YES/NO at the end.",
           },
         ],
       },
     ],
   });
 
-  const textParts = msg.content
-    .filter((c) => c.type === "text")
-    .map((c: any) => c.text);
+  const text = msg.content
+    .map((c) => ("text" in c ? c.text : ""))
+    .join("\n")
+    .trim();
 
-  return textParts.join("\n\n");
+  return text;
 }
 
-// ------------------------
-// POST /api/demo-run
-// ------------------------
 export async function POST(req: Request) {
   try {
-    const body = (await req.json()) as DemoRequestBody;
-    const { claim, question } = body;
+    const body = await req.json();
+    const claim = body.claim as Claim;
+    const question = String(body.question ?? "");
 
-    // 1) deterministic claim law
-    const { decision, reason } = evaluateClaim(claim);
-
-    // 2) always run RIC substrate once, independent of PASS/HALT,
-    //    so we can show the proof bundle either way
-    const ric = await runRicSubstrate({ claim, question });
-
-    const baseResponse: DemoResponse = {
-      decision,
-      reason,
-      proposalHash: "demo-proposal-hash",
-      promptHash: "demo-prompt-hash",
-      version: "0.1.0",
-      ricBundle: {
-        id: ric.id,
-        emitted: ric.emitted,
-        bundle: ric.bundle,
-      },
-    };
-
-    // HALT → substrate only, no model call
-    if (decision === "HALT") {
-      return NextResponse.json(baseResponse);
+    if (!claim || !question) {
+      return NextResponse.json(
+        { error: "Missing claim or question" },
+        { status: 400 },
+      );
     }
 
-    // PASS → substrate + gated Claude
-    const text = await runClaudeGated(claim, question);
-    baseResponse.claude = { text };
+    // 1) Deterministic gate
+    const gate = gateClaim(claim);
 
-    return NextResponse.json(baseResponse);
+    // 2) Real 256-bit hashes (shown in UI + used for replay)
+    const proposalHash = hash256(JSON.stringify(claim));
+    const promptHash = hash256(
+      JSON.stringify({ claim, question, version: VERSION }),
+    );
+
+    // 3) Call RIC v2 local server to get deterministic bundle id
+    const ricPayload = {
+      windows: [{ id: "w1" }],
+      symbols: [JSON.stringify({ claim, question })],
+      primes: [7, 11],
+    };
+
+    const ricResult = await callRicCore(ricPayload);
+    const ricBundle = { id: ricResult.id, emitted: ricResult.emitted };
+
+    // 4) If PASS, call Claude; if HALT, skip model
+    let claudeText: string | undefined;
+    if (gate.decision === "PASS") {
+      claudeText = await callClaude(claim, question);
+    }
+
+    const resp: DemoResponse = {
+      decision: gate.decision,
+      reason: gate.reason,
+      proposalHash,
+      promptHash,
+      version: VERSION,
+      ricBundle,
+      claude: claudeText ? { text: claudeText } : undefined,
+    };
+
+    return NextResponse.json(resp);
   } catch (err: any) {
     return NextResponse.json(
-      {
-        error: {
-          message: err?.message ?? String(err),
-        },
-      },
+      { error: err?.message ?? String(err) },
       { status: 500 },
     );
   }
