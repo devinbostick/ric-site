@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.69.0",
     "gray-matter": "^4.0.3",
     "next": "15.5.3",
     "next-mdx-remote": "^5.0.0",
