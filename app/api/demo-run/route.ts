@@ -19,14 +19,19 @@ type DemoResponse = {
   ricBundle?: {
     id: string;
     emitted: number;
+    graphHash?: string;
+    bundleHash?: string;
   };
   claude?: { text: string };
 };
 
 const VERSION = "0.1.0";
 
-// Default to local RIC if env not set
-const RIC_URL = process.env.RIC_URL || "http://localhost:8787";
+// Default to env RIC_URL, then NEXT_PUBLIC_RIC_URL, then local
+const RIC_URL =
+  process.env.RIC_URL ||
+  process.env.NEXT_PUBLIC_RIC_URL ||
+  "http://localhost:8787";
 
 // ------------------------
 // Local deterministic claim gate
@@ -41,7 +46,9 @@ function hash256(payload: string): string {
   return crypto.createHash("sha256").update(payload).digest("hex");
 }
 
-function gateClaim(claim: Claim): { decision: "PASS" | "HALT"; reason: string | null } {
+function gateClaim(
+  claim: Claim,
+): { decision: "PASS" | "HALT"; reason: string | null } {
   const start = new Date(claim.policy_effective_date);
   const loss = new Date(claim.loss_date);
   const report = new Date(claim.report_date);
