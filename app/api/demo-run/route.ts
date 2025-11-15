@@ -23,7 +23,7 @@ type DemoResponse = {
 };
 
 // ------------------------
-// Deterministic gating
+// Deterministic gating (temporal law)
 // ------------------------
 function evaluateClaim(claim: any): DemoDecision {
   const effective = claim?.policy_effective_date;
@@ -94,6 +94,52 @@ function evaluateClaim(claim: any): DemoDecision {
 }
 
 // ------------------------
+// RIC v2 client
+// ------------------------
+
+const ricUrl = process.env.RIC_URL ?? "http://localhost:8787";
+
+type RicRunResult = {
+  id: string;
+  emitted: number;
+  bundle: any; // use the exact shape if you want stronger typing
+};
+
+async function runRicSubstrate(payload: {
+  claim: any;
+  question: string;
+}): Promise<RicRunResult> {
+  // This shape assumes RIC /run takes windows/symbols/primes; adjust to match server/api.ts
+  const body = {
+    windows: [
+      {
+        id: "w1",
+        // Pack claim/question as symbols for now; this is enough for the demo
+        meta: { kind: "legal-claim-demo" },
+      },
+    ],
+    symbols: [
+      JSON.stringify(payload.claim),
+      payload.question,
+    ],
+    primes: [7, 11],
+  };
+
+  const res = await fetch(`${ricUrl}/run`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    throw new Error(`RIC /run HTTP ${res.status}: ${await res.text()}`);
+  }
+
+  const json = (await res.json()) as RicRunResult;
+  return json;
+}
+
+// ------------------------
 // Claude client for gated path
 // ------------------------
 const anthropicApiKey = process.env.ANTHROPIC_API_KEY;
@@ -153,7 +199,12 @@ export async function POST(req: Request) {
     const body = (await req.json()) as DemoRequestBody;
     const { claim, question } = body;
 
+    // 1) deterministic claim law
     const { decision, reason } = evaluateClaim(claim);
+
+    // 2) always run RIC substrate once, independent of PASS/HALT,
+    //    so we can show the proof bundle either way
+    const ric = await runRicSubstrate({ claim, question });
 
     const baseResponse: DemoResponse = {
       decision,
@@ -162,8 +213,9 @@ export async function POST(req: Request) {
       promptHash: "demo-prompt-hash",
       version: "0.1.0",
       ricBundle: {
-        primes: [7, 11],
-        windows: [{ id: "demo-window" }],
+        id: ric.id,
+        emitted: ric.emitted,
+        bundle: ric.bundle,
       },
     };
 
