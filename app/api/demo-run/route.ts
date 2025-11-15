@@ -16,11 +16,21 @@ type DemoResponse = {
   proposalHash: string;
   promptHash: string;
   version: string;
-  ricBundle?: any;
+  ricBundle?: {
+    id: string;
+    emitted: number;
+  };
   claude?: { text: string };
 };
 
 const VERSION = "0.1.0";
+
+// Default to local RIC if env not set
+const RIC_URL = process.env.RIC_URL || "http://localhost:8787";
+
+// ------------------------
+// Local deterministic claim gate
+// ------------------------
 
 function daysBetween(a: Date, b: Date): number {
   const msPerDay = 24 * 60 * 60 * 1000;
@@ -31,15 +41,12 @@ function hash256(payload: string): string {
   return crypto.createHash("sha256").update(payload).digest("hex");
 }
 
-function gateClaim(
-  claim: Claim,
-): { decision: "PASS" | "HALT"; reason: string | null } {
+function gateClaim(claim: Claim): { decision: "PASS" | "HALT"; reason: string | null } {
   const start = new Date(claim.policy_effective_date);
   const loss = new Date(claim.loss_date);
   const report = new Date(claim.report_date);
   const windowDays = claim.coverage_window_days;
 
-  // 1) Loss must not be before policy start
   if (loss.getTime() < start.getTime()) {
     return {
       decision: "HALT",
@@ -47,7 +54,6 @@ function gateClaim(
     };
   }
 
-  // 2) Loss must be within coverage window from policy start
   const daysFromStartToLoss = daysBetween(start, loss);
   if (daysFromStartToLoss > windowDays) {
     return {
@@ -56,7 +62,6 @@ function gateClaim(
     };
   }
 
-  // 3) Report must be within coverage window from loss
   const daysLossToReport = daysBetween(loss, report);
   if (daysLossToReport > windowDays) {
     return {
@@ -68,10 +73,12 @@ function gateClaim(
   return { decision: "PASS", reason: null };
 }
 
-async function callRicCore(payload: any): Promise<any> {
-  const base = process.env.RIC_URL || "http://localhost:8787";
+// ------------------------
+// RIC v2 substrate call (/run only)
+// ------------------------
 
-  const res = await fetch(`${base}/run`, {
+async function runRic(payload: any): Promise<{ id: string; emitted: number }> {
+  const res = await fetch(`${RIC_URL}/run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(payload),
@@ -81,8 +88,13 @@ async function callRicCore(payload: any): Promise<any> {
     throw new Error(`RIC /run HTTP ${res.status}: ${await res.text()}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  return { id: json.id, emitted: json.emitted ?? 0 };
 }
+
+// ------------------------
+// Claude call (gated)
+// ------------------------
 
 async function callClaude(claim: Claim, question: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -129,6 +141,10 @@ async function callClaude(claim: Claim, question: string): Promise<string> {
   return text;
 }
 
+// ------------------------
+// Route handler
+// ------------------------
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
@@ -145,21 +161,24 @@ export async function POST(req: Request) {
     // 1) Deterministic gate
     const gate = gateClaim(claim);
 
-    // 2) Real 256-bit hashes (shown in UI + used for replay)
+    // 2) Real 256-bit hashes for proposal + prompt
     const proposalHash = hash256(JSON.stringify(claim));
     const promptHash = hash256(
       JSON.stringify({ claim, question, version: VERSION }),
     );
 
-    // 3) Call RIC v2 local server to get deterministic bundle id
+    // 3) Run RIC v2 substrate (no bundle call yet)
     const ricPayload = {
       windows: [{ id: "w1" }],
       symbols: [JSON.stringify({ claim, question })],
       primes: [7, 11],
     };
 
-    const ricResult = await callRicCore(ricPayload);
-    const ricBundle = { id: ricResult.id, emitted: ricResult.emitted };
+    const runResult = await runRic(ricPayload);
+    const ricBundle = {
+      id: runResult.id,
+      emitted: runResult.emitted,
+    };
 
     // 4) If PASS, call Claude; if HALT, skip model
     let claudeText: string | undefined;

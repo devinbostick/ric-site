@@ -357,15 +357,46 @@ export default function DemoPage() {
                 </div>
 
                 {/* Proof Bundle (optional) */}
-                {response.ricBundle && (
-                  <details>
-                    <summary className="cursor-pointer text-xs text-slate-600">
-                      View RIC proof bundle
-                    </summary>
-                    <pre className="mt-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto">
-                      {JSON.stringify(response.ricBundle, null, 2)}
-                    </pre>
-                  </details>
+                  {response.ricBundle && (
+                    <div className="space-y-2 text-[11px] font-mono">
+                      <div>
+                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                          RIC Run ID
+                        </div>
+                        <div className="break-all">{response.ricBundle.id}</div>
+                      </div>
+
+                      {response.ricBundle.graphHash && (
+                        <div>
+                          <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                            graphHash
+                          </div>
+                          <div className="break-all">
+                            {response.ricBundle.graphHash}
+                          </div>
+                        </div>
+                      )}
+
+                      {response.ricBundle.bundleHash && (
+                        <div>
+                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                          bundleHash
+                        </div>
+                        <div className="break-all">
+                          {response.ricBundle.bundleHash}
+                        </div>
+                      </div>
+                     )}
+
+                    <details>
+                      <summary className="cursor-pointer text-xs text-slate-600">
+                        View full RIC bundle payload
+                      </summary>
+                      <pre className="mt-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto">
+                       {JSON.stringify(response.ricBundle, null, 2)}
+                      </pre>
+                    </details>
+                  </div>
                 )}
 
                 {/* Replay button */}
