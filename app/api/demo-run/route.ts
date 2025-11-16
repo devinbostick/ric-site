@@ -27,8 +27,9 @@ type DemoResponse = {
 
 const VERSION = "0.1.0";
 
-// Default to env RIC_URL, then NEXT_PUBLIC_RIC_URL, then local
+// Prefer RIC_API_BASE, then RIC_URL, then NEXT_PUBLIC_RIC_URL, then local
 const RIC_URL =
+  process.env.RIC_API_BASE || 
   process.env.RIC_URL ||
   process.env.NEXT_PUBLIC_RIC_URL ||
   "http://localhost:8787";
