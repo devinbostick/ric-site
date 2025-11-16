@@ -1,141 +1,191 @@
 // app/stem/page.tsx
-
 "use client";
 
 import { useState } from "react";
 
-type StemResponse = {
-  ok: boolean;
-  t: number[];
-  y: number[][];
+type StemResult = unknown;
+
+type PresetKey = "ode_zero" | "ode_decay";
+
+const PRESET_LABELS: Record<PresetKey, string> = {
+  ode_zero: "Test ODE: y' = 0",
+  ode_decay: "Test ODE: y' = -y",
 };
 
-const TEST_BODY = {
-  kind: "ode_linear",
-  system: {
-    A: [[0]],
-    b: [0],
+const PRESET_BODIES: Record<PresetKey, any> = {
+  ode_zero: {
+    kind: "ode_linear",
+    system: {
+      // y' = 0
+      A: [[0]],
+      b: [0],
+    },
+    config: {
+      t0: 0,
+      t1: 1,
+      dt: 0.1,
+      y0: [0],
+    },
   },
-  config: {
-    t0: 0,
-    t1: 1,
-    dt: 0.1,
-    y0: [0],
+  ode_decay: {
+    kind: "ode_linear",
+    system: {
+      // y' = -y  ⇒ A = [-1], b = [0]
+      A: [[-1]],
+      b: [0],
+    },
+    config: {
+      t0: 0,
+      t1: 3,
+      dt: 0.1,
+      y0: [1],
+    },
   },
 };
 
 export default function StemPage() {
+  const [activePreset, setActivePreset] = useState<PresetKey>("ode_zero");
+  const [result, setResult] = useState<StemResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<StemResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  async function runTest() {
+  async function runPreset(kind: PresetKey) {
+    setActivePreset(kind);
     setLoading(true);
     setError(null);
+    setResult(null);
+
     try {
+      const body = PRESET_BODIES[kind];
+
       const res = await fetch("/api/stem-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(TEST_BODY),
+        body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        setError("STEM backend returned an error.");
-        setResult(null);
-        return;
+
+      const json = await res.json();
+      if (!res.ok) {
+        setError(
+          typeof json?.error?.message === "string"
+            ? json.error.message
+            : "STEM run failed"
+        );
+      } else {
+        setResult(json);
       }
-      setResult(data);
     } catch (e: any) {
-      setError(e?.message || "Request failed.");
-      setResult(null);
+      setError(e?.message || "Network error");
     } finally {
       setLoading(false);
     }
   }
 
+  const presetBody = PRESET_BODIES[activePreset];
+
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-10">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <header className="space-y-2">
+    <main className="min-h-screen flex flex-col items-center px-4 py-16">
+      <div className="w-full max-w-4xl space-y-10">
+        <header className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
             RIC-STEM v1
           </h1>
-          <p className="text-base md:text-lg text-neutral-700">
-            Deterministic STEM engine: fixed-point ODE integration and linear
-            systems over a replayable substrate.
+          <p className="text-base md:text-lg leading-relaxed text-neutral-700">
+            Deterministic STEM engine: fixed-point Q32 ODE integration and
+            linear systems over a replayable resonance substrate.
           </p>
         </header>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left: preset problem description */}
-          <section className="rounded-2xl border bg-white p-5 shadow-sm space-y-3">
-            <h2 className="text-lg font-medium">Test ODE: y&apos; = 0</h2>
-            <p className="text-sm text-neutral-700">
-              This preset sends a simple linear system with A = [0], b = [0],
-              so the derivative is always zero and the solution remains
-              constant at y(t) = 0.
+        {/* Preset selector + request */}
+        <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
+          <div className="flex flex-wrap gap-3 items-center justify-between">
+            <div>
+              <h2 className="text-lg font-medium">
+                {PRESET_LABELS[activePreset]}
+              </h2>
+              <p className="text-sm text-neutral-600 mt-1 max-w-xl">
+                Choose a preset and run it through the RIC-STEM backend. The
+                request is sent to <code>/api/stem-run</code>, which proxies to
+                the deterministic substrate at <code>/stem/run</code>.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => runPreset("ode_zero")}
+                className={`px-3 py-1.5 text-sm rounded-full border ${
+                  activePreset === "ode_zero"
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-neutral-800 border-neutral-300"
+                }`}
+              >
+                y&apos; = 0
+              </button>
+              <button
+                type="button"
+                onClick={() => runPreset("ode_decay")}
+                className={`px-3 py-1.5 text-sm rounded-full border ${
+                  activePreset === "ode_decay"
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-neutral-800 border-neutral-300"
+                }`}
+              >
+                y&apos; = -y
+              </button>
+            </div>
+          </div>
+
+          <div className="bg-black text-[13px] text-neutral-100 rounded-xl p-4 font-mono overflow-x-auto">
+            <div className="text-xs text-neutral-400 mb-2">
+              POST /api/stem-run
+            </div>
+            <pre className="whitespace-pre">
+              {JSON.stringify(presetBody, null, 2)}
+            </pre>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => runPreset(activePreset)}
+            className="inline-flex items-center justify-center px-4 py-2.5 rounded-full bg-black text-white text-sm font-medium hover:bg-neutral-900 disabled:opacity-60 disabled:cursor-not-allowed"
+            disabled={loading}
+          >
+            {loading ? "Running…" : "Run preset"}
+          </button>
+        </section>
+
+        {/* Result */}
+        <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-3">
+          <h2 className="text-lg font-medium">Result</h2>
+          {error && (
+            <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
+              {error}
+            </div>
+          )}
+          {!error && !result && (
+            <p className="text-sm text-neutral-600">
+              Run a preset to view the deterministic solution.
             </p>
-
-            <div className="rounded-lg bg-neutral-900 text-neutral-50 text-xs font-mono p-3 overflow-x-auto">
-              <pre className="whitespace-pre-wrap">
-{`POST /api/stem-run
-
-{
-  "kind": "ode_linear",
-  "system": {
-    "A": [[0]],
-    "b": [0]
-  },
-  "config": {
-    "t0": 0,
-    "t1": 1,
-    "dt": 0.1,
-    "y0": [0]
-  }
-}`}
+          )}
+          {result && (
+            <div className="bg-neutral-950 text-[13px] text-neutral-100 rounded-xl p-4 font-mono overflow-x-auto max-h-[360px]">
+              <pre className="whitespace-pre">
+                {JSON.stringify(result, null, 2)}
               </pre>
             </div>
+          )}
+        </section>
 
-            <button
-              onClick={runTest}
-              disabled={loading}
-              className="inline-flex items-center justify-center rounded-full border border-neutral-900 bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
-            >
-              {loading ? "Running…" : "Run test ODE"}
-            </button>
-
-            {error && (
-              <p className="text-sm text-red-600">
-                {error}
-              </p>
-            )}
-          </section>
-
-          {/* Right: result viewer */}
-          <section className="rounded-2xl border bg-white p-5 shadow-sm flex flex-col">
-            <h2 className="text-lg font-medium mb-2">Result</h2>
-            <div className="flex-1 rounded-lg bg-neutral-100 text-xs font-mono p-3 overflow-auto">
-              {result ? (
-                <pre className="whitespace-pre">
-                  {JSON.stringify(result, null, 2)}
-                </pre>
-              ) : (
-                <p className="text-sm text-neutral-600">
-                  Run the test to see the time grid and solution vector from the
-                  deterministic STEM engine.
-                </p>
-              )}
-            </div>
-          </section>
-        </div>
-
-        <section className="rounded-2xl border bg-white p-5 shadow-sm text-sm text-neutral-700">
-          <h2 className="text-base font-medium mb-1">Status</h2>
-          <ul className="list-disc list-inside space-y-1">
-            <li>RIC v2 substrate live at /stem/run.</li>
-            <li>This page calls /api/stem-run → RIC /stem/run.</li>
-            <li>Future: multiple presets, custom system editor, and plots.</li>
-          </ul>
+        {/* Determinism card */}
+        <section className="border rounded-2xl p-5 md:p-6 bg-neutral-50 space-y-2">
+          <h2 className="text-base font-medium">Determinism</h2>
+          <p className="text-sm text-neutral-700">
+            RIC-STEM integrates these systems in fixed-point Q32 on the server.
+            The <code>t</code> and <code>y</code> arrays shown above are
+            float projections of the same underlying Q32 sequence. The same
+            request body will produce identical outputs on any machine that
+            runs this substrate.
+          </p>
         </section>
       </div>
     </main>
