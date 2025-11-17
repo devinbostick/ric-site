@@ -45,6 +45,13 @@ export default function HomePage() {
               Building for legal tech, STEM reasoning, and safety-critical
               infrastructure.
             </p>
+
+            <p className="text-xs text-neutral-500">
+              Or see RIC act as a deterministic filter in the{" "}
+              <Link href="/demo" className="underline underline-offset-2">
+                legality demo →
+              </Link>
+            </p>
           </div>
 
           {/* API access / email capture */}
