@@ -1,201 +1,183 @@
 // app/page.tsx
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Page() {
   return (
-    <main className="min-h-screen bg-[#050816] text-white">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-10 md:py-16">
-        {/* Top bar */}
-        <header className="flex items-center justify-between gap-4">
+    <main className="min-h-screen bg-neutral-950 text-neutral-50">
+      <div className="mx-auto max-w-5xl px-4 py-12 md:py-16 flex flex-col gap-16">
+        {/* Brand + simple nav */}
+        <header className="flex items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <div className="relative h-10 w-10 rounded-full bg-white/5 shadow-[0_0_60px_rgba(255,255,255,0.18)] flex items-center justify-center overflow-hidden">
-              {/* Logo mark */}
+            <div className="relative h-9 w-9 rounded-full border border-neutral-700/80 bg-neutral-900/80 flex items-center justify-center">
               <Image
                 src="/ric-spiral.svg"
-                alt="Resonance Intelligence Core"
+                alt="Resonance Intelligence Core spiral"
                 fill
                 className="object-contain p-1.5"
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-400">
+              <span className="text-[11px] font-semibold tracking-[0.22em] text-neutral-400 uppercase">
                 Resonance Intelligence
               </span>
-              <span className="text-sm font-semibold text-neutral-100">
+              <span className="text-sm font-medium text-neutral-100">
                 Resonance Intelligence Core
               </span>
             </div>
           </div>
 
-          <nav className="hidden items-center gap-4 text-xs md:flex text-neutral-300">
-            <Link href="/demo" className="hover:text-white">
+          <nav className="hidden md:flex items-center gap-6 text-xs font-medium text-neutral-400">
+            <Link href="/demo" className="hover:text-neutral-100">
               Legality demo
             </Link>
-            <Link href="/stem" className="hover:text-white">
-              RIC-STEM
+            <Link href="/stem" className="hover:text-neutral-100">
+              RIC-STEM v1
             </Link>
-            <Link href="/ric-stem" className="hover:text-white">
-              Docs
+            <Link href="/ric-stem" className="hover:text-neutral-100">
+              RIC-STEM overview
             </Link>
           </nav>
         </header>
 
         {/* Hero */}
-        <section className="mt-14 flex flex-1 flex-col gap-10 md:mt-20 md:flex-row md:items-center">
-          <div className="flex-1 space-y-6">
-            <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-5xl lg:text-6xl">
-              Deterministic inference,
-              <br />
-              replayable legality.
+        <section className="space-y-8">
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight">
+              Resonance Intelligence Core
             </h1>
-
-            <p className="max-w-xl text-sm leading-relaxed text-neutral-300 md:text-base">
-              Resonance Intelligence Core (RIC) is a deterministic substrate for
-              running models under hard rules. Every run is fixed-point, fully
-              replayable, and produces a proof bundle you can audit later.
+            <p className="text-lg md:text-xl text-neutral-300">
+              Deterministic inference, replayable legality.
             </p>
+            <p className="text-sm md:text-base text-neutral-400 max-w-2xl">
+              RIC is a deterministic substrate for running models under hard
+              rules. Every run is fixed-point, fully replayable, and produces a
+              proof bundle you can audit later.
+            </p>
+          </div>
 
-            <div className="grid gap-3 text-xs text-neutral-200 md:grid-cols-3 md:text-sm">
-              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-300">
-                  Substrate
-                </div>
-                <div className="mt-1 font-medium">
+          {/* Three-pill stack */}
+          <div className="grid gap-4">
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-neutral-500 uppercase">
+                Substrate
+              </div>
+              <div className="mt-1 md:mt-0">
+                <div className="text-sm font-medium text-neutral-50">
                   Q32 deterministic core
                 </div>
-                <p className="mt-1 text-[11px] text-neutral-300">
+                <div className="text-xs text-neutral-400 mt-0.5">
                   No floats, no randomness. Same input → same bits across
                   machines.
-                </p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-300">
-                  Legality
                 </div>
-                <div className="mt-1 font-medium">Pre-emission gating</div>
-                <p className="mt-1 text-[11px] text-neutral-300">
-                  RIC checks each candidate step against safety and legality
-                  rules before emitting.
-                </p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-3">
-                <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-300">
-                  STEM
-                </div>
-                <div className="mt-1 font-medium">Deterministic math engine</div>
-                <p className="mt-1 text-[11px] text-neutral-300">
-                  Linear ODEs and algebra over the substrate, with metrics and
-                  replayable runs.
-                </p>
               </div>
             </div>
 
-            {/* Primary CTAs */}
-            <div className="mt-2 flex flex-wrap gap-3">
-              <Link
-                href="/demo"
-                className="inline-flex items-center justify-center rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-black shadow-md hover:bg-neutral-100"
-              >
-                Open legality demo
-              </Link>
-              <Link
-                href="/stem"
-                className="inline-flex items-center justify-center rounded-full border border-white/40 px-5 py-2.5 text-sm font-semibold text-white hover:bg-white/5"
-              >
-                Open RIC-STEM engine
-              </Link>
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-neutral-500 uppercase">
+                Legality
+              </div>
+              <div className="mt-1 md:mt-0">
+                <div className="text-sm font-medium text-neutral-50">
+                  Pre-emission gating
+                </div>
+                <div className="text-xs text-neutral-400 mt-0.5">
+                  RIC checks each candidate step against safety and legality
+                  rules before emitting.
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 px-4 py-4 md:px-6 md:py-5 flex flex-col md:flex-row md:items-center md:justify-between">
+              <div className="text-[11px] font-semibold tracking-[0.22em] text-neutral-500 uppercase">
+                STEM
+              </div>
+              <div className="mt-1 md:mt-0">
+                <div className="text-sm font-medium text-neutral-50">
+                  Deterministic math engine
+                </div>
+                <div className="text-xs text-neutral-400 mt-0.5">
+                  Linear ODEs and algebra over the substrate, with metrics and
+                  replayable runs.
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Right column: email + quick facts */}
-          <div className="mt-8 w-full max-w-sm space-y-4 md:mt-0 md:w-80">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-neutral-300">
-                API access
-              </p>
-              <p className="mt-1 text-sm text-neutral-100">
-                Want access to the RIC API or a pilot integration?
-              </p>
-
-              <form
-                action="https://formspree.io/f/mvgbybpa"
-                method="POST"
-                className="mt-4 space-y-2"
-              >
-                <input
-                  type="text"
-                  name="_gotcha"
-                  className="hidden"
-                  autoComplete="off"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="you@email.com"
-                  required
-                  className="w-full rounded-xl border border-white/20 bg-black/20 px-3 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-white/60"
-                />
-                <input
-                  type="hidden"
-                  name="_subject"
-                  value="New RIC API interest"
-                />
-                <input type="hidden" name="_next" value="/thanks" />
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center rounded-xl bg-white py-2.5 text-sm font-semibold text-black hover:bg-neutral-100"
-                >
-                  Request API access
-                </button>
-                <p className="text-[10px] text-neutral-400">
-                  One or two emails as we open pilots. No spam.
-                </p>
-              </form>
-            </div>
-
-            <div className="rounded-2xl border border-white/5 bg-black/40 p-4 text-xs text-neutral-300">
-              <div className="font-semibold text-neutral-100">
-                Live endpoints
-              </div>
-              <ul className="mt-1 space-y-1.5 font-mono text-[11px]">
-                <li>
-                  <span className="text-neutral-400">STEM:</span> POST
-                  /stem/run, POST /algebra/run
-                </li>
-                <li>
-                  <span className="text-neutral-400">Legality core:</span> POST
-                  /run, POST /replay
-                </li>
-                <li>
-                  <span className="text-neutral-400">Metrics:</span> GET
-                  /metrics
-                </li>
-              </ul>
-            </div>
+          {/* Primary CTAs */}
+          <div className="flex flex-wrap gap-4 pt-2">
+            <Link
+              href="/demo"
+              className="inline-flex items-center justify-center rounded-full bg-neutral-50 text-neutral-950 px-6 py-2.5 text-sm font-semibold hover:bg-neutral-200 transition"
+            >
+              Open legality demo
+            </Link>
+            <Link
+              href="/stem"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-600 bg-neutral-950 px-6 py-2.5 text-sm font-semibold text-neutral-50 hover:border-neutral-300 transition"
+            >
+              Open RIC-STEM engine
+            </Link>
           </div>
         </section>
 
+        {/* API access */}
+        <section className="mt-4 rounded-2xl border border-neutral-800 bg-neutral-900/70 px-4 py-6 md:px-6 md:py-7">
+          <h2 className="text-sm font-semibold tracking-[0.18em] uppercase text-neutral-400">
+            API access
+          </h2>
+          <p className="mt-2 text-sm text-neutral-300">
+            Want access to the RIC API or a pilot integration?
+          </p>
+
+          <form
+            action="https://formspree.io/f/mvgbybpa"
+            method="POST"
+            className="mt-4 flex flex-col sm:flex-row gap-3"
+          >
+            <input type="text" name="_gotcha" className="hidden" autoComplete="off" />
+
+            <input
+              type="email"
+              name="email"
+              required
+              placeholder="you@email.com"
+              className="flex-1 rounded-xl border border-neutral-700 bg-neutral-950 px-4 py-2.5 text-sm text-neutral-50 placeholder:text-neutral-500 focus:outline-none focus:ring-1 focus:ring-neutral-300"
+            />
+            <input type="hidden" name="_subject" value="RIC API access request" />
+            <input type="hidden" name="_next" value="/thanks" />
+
+            <button
+              type="submit"
+              className="rounded-xl bg-neutral-50 px-5 py-2.5 text-sm font-semibold text-neutral-950 hover:bg-neutral-200 transition"
+            >
+              Request API access
+            </button>
+          </form>
+
+          <p className="mt-2 text-[11px] text-neutral-500">
+            One or two emails as we open pilots. No spam.
+          </p>
+        </section>
+
         {/* Footer */}
-        <footer className="border-t bg-white">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-6 text-xs text-neutral-600">
-            <div className="flex flex-wrap gap-4">
-              <Link href="/demo" className="underline underline-offset-2">
-                Legality demo
-              </Link>
-              <Link href="/legality-demo" className="underline underline-offset-2">
-                Legality overview
-              </Link>
-              <Link href="/stem" className="underline underline-offset-2">
-                RIC-STEM v1
-              </Link>
-              <Link href="/ric-stem" className="underline underline-offset-2">
-                RIC-STEM overview
-              </Link>
-            </div>
-            <span>© 2025 Resonance Intelligence Core</span>
+        <footer className="border-t border-neutral-900 pt-6 mt-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 text-xs text-neutral-500">
+          <div className="flex flex-wrap gap-4">
+            <Link href="/demo" className="underline underline-offset-2">
+              Legality demo
+            </Link>
+            <Link href="/legality-demo" className="underline underline-offset-2">
+              Legality overview
+            </Link>
+            <Link href="/stem" className="underline underline-offset-2">
+              RIC-STEM v1
+            </Link>
+            <Link href="/ric-stem" className="underline underline-offset-2">
+              RIC-STEM overview
+            </Link>
           </div>
+          <div>© {new Date().getFullYear()} Resonance Intelligence Core</div>
         </footer>
       </div>
     </main>
