@@ -148,14 +148,23 @@ export default function StemPage() {
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
       <div className="w-full max-w-5xl space-y-10">
         <header className="space-y-3">
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            RIC-STEM v1
-          </h1>
-          <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
-            Deterministic STEM engine over the RIC substrate. Fixed-point
-            Q32 numerics, replayable runs, and legality-locked reasoning.
-          </p>
-        </header>
+         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+          RIC-STEM v1
+         </h1>
+         <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
+          Deterministic STEM engine over the RIC substrate. Fixed-point
+          Q32 numerics, replayable runs, and legality-locked reasoning.
+         </p>
+
+         <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800">
+          <div className="font-medium mb-0.5">What you are seeing</div>
+          <ul className="list-disc list-inside space-y-0.5">
+           <li>All math runs in fixed-point Q32 on a replayable substrate.</li>
+           <li>Every run is deterministic (no randomness, no floats in core).</li>
+           <li>Same request → same bitwise answer across machines.</li>
+          </ul>
+         </div>
+       </header>
 
         {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
@@ -172,6 +181,9 @@ export default function StemPage() {
           <form onSubmit={runOde} className="space-y-3">
             <label className="block text-sm font-medium">
               Request payload (JSON)
+              <span className="ml-1 text-[11px] text-neutral-500">
+                e.g. 1D system dy/dt = 0 with y(0) = 0
+              </span>
             </label>
             <textarea
               className="w-full min-h-[160px] rounded-lg border px-3 py-2 text-sm font-mono bg-neutral-50"
@@ -218,10 +230,11 @@ export default function StemPage() {
           <p className="text-sm text-neutral-700">
             Solves <code>Ax = b</code> deterministically at{" "}
             <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
-              /algebra/run
+             /algebra/run
             </code>{" "}
             via <code className="text-xs">/api/algebra-run</code>. Backend
-            outputs both Q32 integers and float representations.
+            outputs both Q32 integers and float representations. The default
+            example solves a 2×2 system to x ≈ [1.666666, 0.666666].
           </p>
 
           <form onSubmit={runAlgebra} className="space-y-4">
