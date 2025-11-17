@@ -9,14 +9,8 @@ export default function Page() {
         {/* Top nav */}
         <header className="mb-10 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-full border border-neutral-200 bg-white flex items-center justify-center overflow-hidden">
-              <Image
-                src="/ric-spiral.svg"
-                alt="RIC spiral"
-                width={24}
-                height={24}
-                priority
-              />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white">
+              RIC
             </div>
             <div className="flex flex-col leading-tight">
               <span className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-500">
