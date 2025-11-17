@@ -6,9 +6,9 @@ export const metadata: Metadata = {
   title: "Resonance Intelligence Core",
   description: "Deterministic inference, replayable legality.",
   icons: {
-    icon: "/ric-spiral.svg",
-    shortcut: "/ric-spiral.svg",
-    apple: "/ric-spiral.svg",
+    icon: "/ric-icon.svg",
+    shortcut: "/ric-icon.svg",
+    apple: "/ric-icon.svg",
   },
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-neutral-950 text-neutral-50">
+      <body className="min-h-screen bg-white text-neutral-900">
         {children}
       </body>
     </html>
