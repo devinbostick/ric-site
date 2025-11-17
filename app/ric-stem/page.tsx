@@ -304,7 +304,7 @@ export default function RicStemPage() {
           <div className="pt-6 text-neutral-500">
             <p className="font-medium">Research background</p>
             <p className="mt-1">
-              For the underlying deterministic coherence theory behind RIC, see the
+              For the underlying deterministic coherence theory behind RIC, see the{" "}
               <a
                 href="https://zenodo.org/records/17545317"
                 target="_blank"
