@@ -41,6 +41,12 @@ export default function StemPage() {
   const [odeError, setOdeError] = useState<string | null>(null);
   const [odeLoading, setOdeLoading] = useState(false);
 
+  // ODE replay state
+  const [odeReplayResult, setOdeReplayResult] = useState<OdeResult | null>(null);
+  const [odeReplayError, setOdeReplayError] = useState<string | null>(null);
+  const [odeReplayLoading, setOdeReplayLoading] = useState(false);
+  const [odeReplaySame, setOdeReplaySame] = useState<boolean | null>(null);
+
   // -------- Algebra state --------
   const [AInput, setAInput] = useState<string>("[[1,-1],[2,1]]");
   const [bInput, setBInput] = useState<string>("[1,4]");
@@ -53,6 +59,9 @@ export default function StemPage() {
     e.preventDefault();
     setOdeError(null);
     setOdeResult(null);
+    setOdeReplayResult(null);
+    setOdeReplayError(null);
+    setOdeReplaySame(null);
     setOdeLoading(true);
 
     try {
@@ -88,6 +97,60 @@ export default function StemPage() {
       setOdeError(err?.message || "Unexpected error");
     } finally {
       setOdeLoading(false);
+    }
+  }
+
+  // -------- ODE replay handler --------
+  async function replayOde() {
+    if (!odeResult) {
+      setOdeReplayError("Run the ODE once before replaying.");
+      return;
+    }
+
+    setOdeReplayError(null);
+    setOdeReplayResult(null);
+    setOdeReplaySame(null);
+    setOdeReplayLoading(true);
+
+    try {
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(odePayload);
+      } catch {
+        setOdeReplayError("Payload is not valid JSON");
+        setOdeReplayLoading(false);
+        return;
+      }
+
+      const res = await fetch("/api/stem-run", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+
+      const json = (await res.json()) as any;
+
+      if (!res.ok || !json.ok) {
+        setOdeReplayError(json?.error?.message || "STEM ODE replay failed");
+        setOdeReplayLoading(false);
+        return;
+      }
+
+      const replay: OdeResult = {
+        ok: true,
+        t: json.t ?? [],
+        y: json.y ?? [],
+      };
+
+      const sameT = JSON.stringify(replay.t) === JSON.stringify(odeResult.t);
+      const sameY = JSON.stringify(replay.y) === JSON.stringify(odeResult.y);
+
+      setOdeReplayResult(replay);
+      setOdeReplaySame(sameT && sameY);
+    } catch (err: any) {
+      setOdeReplayError(err?.message || "Unexpected replay error");
+    } finally {
+      setOdeReplayLoading(false);
     }
   }
 
@@ -148,23 +211,31 @@ export default function StemPage() {
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
       <div className="w-full max-w-5xl space-y-10">
         <header className="space-y-3">
-         <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-          RIC-STEM v1
-         </h1>
-         <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
-          Deterministic STEM engine over the RIC substrate. Fixed-point
-          Q32 numerics, replayable runs, and legality-locked reasoning.
-         </p>
+          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
+            RIC-STEM v1
+          </h1>
+          <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
+            Deterministic STEM engine over the RIC substrate. Fixed-point Q32
+            numerics, replayable runs, and legality-locked reasoning.
+          </p>
 
-         <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800">
-          <div className="font-medium mb-0.5">What you are seeing</div>
-          <ul className="list-disc list-inside space-y-0.5">
-           <li>All math runs in fixed-point Q32 on a replayable substrate.</li>
-           <li>Every run is deterministic (no randomness, no floats in core).</li>
-           <li>Same request → same bitwise answer across machines.</li>
-          </ul>
-         </div>
-       </header>
+          <p className="text-xs md:text-sm text-neutral-500">
+            Every ODE and algebra run increments the STEM counters exposed at{" "}
+            <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
+              GET /metrics
+            </code>{" "}
+            on the RIC substrate.
+          </p>
+
+          <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800">
+            <div className="font-medium mb-0.5">What you are seeing</div>
+            <ul className="list-disc list-inside space-y-0.5">
+              <li>All math runs in fixed-point Q32 on a replayable substrate.</li>
+              <li>Every run is deterministic (no randomness, no floats in core).</li>
+              <li>Same request → same bitwise answer across machines.</li>
+            </ul>
+          </div>
+        </header>
 
         {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
@@ -191,13 +262,24 @@ export default function StemPage() {
               onChange={(e) => setOdePayload(e.target.value)}
             />
 
-            <button
-              type="submit"
-              disabled={odeLoading}
-              className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
-            >
-              {odeLoading ? "Running…" : "Run ODE"}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={odeLoading}
+                className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
+              >
+                {odeLoading ? "Running…" : "Run ODE"}
+              </button>
+
+              <button
+                type="button"
+                onClick={replayOde}
+                disabled={odeReplayLoading || !odeResult}
+                className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-white text-black disabled:opacity-60"
+              >
+                {odeReplayLoading ? "Replaying…" : "Replay last ODE"}
+              </button>
+            </div>
           </form>
 
           {odeError && (
@@ -222,6 +304,41 @@ export default function StemPage() {
               </div>
             </div>
           )}
+
+          {odeReplayError && (
+            <p className="text-sm text-red-600 whitespace-pre-wrap">
+              {odeReplayError}
+            </p>
+          )}
+
+          {odeReplayResult && (
+            <div className="mt-3 grid gap-3 md:grid-cols-3">
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">Replay t (time grid)</div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(odeReplayResult.t, null, 2)}
+                </pre>
+              </div>
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">Replay y(t) (state)</div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(odeReplayResult.y, null, 2)}
+                </pre>
+              </div>
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border flex flex-col justify-between">
+                <div>
+                  <div className="font-semibold mb-1">Determinism check</div>
+                  <p className="text-sm">
+                    {odeReplaySame === null
+                      ? "Not evaluated yet."
+                      : odeReplaySame
+                      ? "Deterministic: replay matches original."
+                      : "Mismatch: replay does not match original."}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* Algebra card */}
@@ -230,7 +347,7 @@ export default function StemPage() {
           <p className="text-sm text-neutral-700">
             Solves <code>Ax = b</code> deterministically at{" "}
             <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
-             /algebra/run
+              /algebra/run
             </code>{" "}
             via <code className="text-xs">/api/algebra-run</code>. Backend
             outputs both Q32 integers and float representations. The default
