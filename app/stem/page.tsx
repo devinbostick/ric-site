@@ -237,6 +237,16 @@ export default function StemPage() {
           </div>
         </header>
 
+        <p className="text-xs md:text-sm pt-1">
+          Learn more in the{" "}
+          <a
+            href="/ric-stem"
+            className="underline underline-offset-2 text-neutral-800"
+          >
+            RIC-STEM v1 overview →
+          </a>
+        </p>
+
         {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
           <h2 className="text-xl font-semibold">1. ODE — Linear system</h2>
