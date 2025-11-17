@@ -1,5 +1,4 @@
 // app/legality-demo/page.tsx
-
 import Link from "next/link";
 
 export default function LegalityDemoPage() {
@@ -102,14 +101,12 @@ export default function LegalityDemoPage() {
                 </li>
                 <li>
                   <span className="font-semibold">Safety & compliance:</span>{" "}
-                  Encode rules that must never be violated (for example, “do not
-                  use cases after date X” or “never answer outside jurisdiction
-                  Y”).
+                  Encode rules that must never be violated.
                 </li>
                 <li>
-                  <span className="font-semibold">Control:</span> You keep your
-                  existing model stack and wrap it in a deterministic gate that
-                  you own and can version.
+                  <span className="font-semibold">Control:</span> Wrap your
+                  existing model in a deterministic gate you control and can
+                  version.
                 </li>
               </ul>
             </section>
@@ -124,15 +121,16 @@ export default function LegalityDemoPage() {
                 <li>Your app calls your text model as usual.</li>
                 <li>
                   Instead of returning that answer directly, your backend wraps
-                  it in a RIC <code className="text-[11px] bg-white/10 px-1 py-0.5 rounded">/run</code>{" "}
+                  it in a RIC{" "}
+                  <code className="text-[11px] bg-white/10 px-1 py-0.5 rounded">
+                    /run
+                  </code>{" "}
                   call with your legality rules.
                 </li>
                 <li>
                   RIC returns either:
                   <ul className="ml-5 mt-1 list-disc list-inside space-y-1">
-                    <li>
-                      a legal answer + proof bundle, or
-                    </li>
+                    <li>a legal answer + proof bundle, or</li>
                     <li>a halt signal with a deterministic explanation.</li>
                   </ul>
                 </li>
@@ -144,7 +142,7 @@ export default function LegalityDemoPage() {
             </section>
           </div>
 
-          {/* Right: summary card */}
+          {/* Right summary card */}
           <aside className="space-y-4">
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-100">
               <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
@@ -163,20 +161,14 @@ export default function LegalityDemoPage() {
               <ul className="mt-2 space-y-1.5">
                 <li>
                   Open the{" "}
-                  <Link
-                    href="/demo"
-                    className="underline underline-offset-2"
-                  >
+                  <Link href="/demo" className="underline underline-offset-2">
                     live legality demo
                   </Link>
                   .
                 </li>
                 <li>
                   Explore deterministic math in the{" "}
-                  <Link
-                    href="/stem"
-                    className="underline underline-offset-2"
-                  >
+                  <Link href="/stem" className="underline underline-offset-2">
                     RIC-STEM engine
                   </Link>
                   .
@@ -192,6 +184,24 @@ export default function LegalityDemoPage() {
             </div>
           </aside>
         </div>
+
+        {/* Research background */}
+        <footer className="mt-10 border-t border-white/10 pt-4 text-[11px] text-neutral-300">
+          <p>
+            Research background. For the underlying deterministic coherence
+            theory behind RIC, see{" "}
+            <a
+              href="https://zenodo.org/records/17545317"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2"
+            >
+              CODES: The Coherence Framework Replacing Probability in Physics,
+              Intelligence, and Reality (v40)
+            </a>
+            .
+          </p>
+        </footer>
       </div>
     </main>
   );
