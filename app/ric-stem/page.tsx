@@ -6,6 +6,7 @@ export default function RicStemPage() {
   return (
     <main className="min-h-screen bg-white text-neutral-900">
       <div className="mx-auto max-w-3xl px-4 py-16 md:py-20 space-y-8">
+        {/* Header */}
         <header className="space-y-3">
           <p className="text-xs font-medium text-neutral-500 uppercase tracking-[0.18em]">
             RIC-STEM v1
@@ -14,10 +15,11 @@ export default function RicStemPage() {
             RIC-STEM v1 — Deterministic STEM engine
           </h1>
           <p className="text-sm md:text-base text-neutral-700 leading-relaxed">
-            RIC-STEM v1 is a deterministic STEM engine running on the Resonance
-            Intelligence Core substrate. It exposes a linear ODE integrator and
-            a linear algebra solver, both using fixed-point Q32 arithmetic with
-            full replayability.
+            RIC-STEM v1 is a small, focused math engine that runs on top of the
+            Resonance Intelligence Core substrate. It exposes two things:
+            a linear ODE integrator and a linear algebra solver. All math runs
+            in fixed-point 32-bit arithmetic, so every run is exactly
+            repeatable.
           </p>
           <p className="text-xs md:text-sm text-neutral-600">
             Try it live in the{" "}
@@ -32,25 +34,29 @@ export default function RicStemPage() {
 
         <hr className="border-neutral-200" />
 
-        {/* 1. Stack */}
+        {/* 1. What RIC-STEM gives you */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">1. Stack</h2>
-          <div className="space-y-1 text-sm text-neutral-700">
-            <p className="font-medium">Substrate</p>
+          <h2 className="text-lg font-semibold">1. What RIC-STEM gives you</h2>
+
+          <div className="space-y-2 text-sm text-neutral-700">
+            <p className="font-medium">Deterministic substrate</p>
             <p>
-              RIC v2 with a Q32 kernel and the legality stack (PAS, CHORDLOCK,
-              TEMPOLOCK, GLYPHLOCK, AURA_OUT, ELF, LockGraph).
+              All computations run on a fixed-point core (Q32). There are no
+              floats and no randomness in the math engine. Same input →
+              same output, bit-for-bit, across machines.
             </p>
           </div>
-          <div className="space-y-1 text-sm text-neutral-700">
-            <p className="font-medium">STEM layer (v1)</p>
+
+          <div className="space-y-2 text-sm text-neutral-700">
+            <p className="font-medium">STEM endpoints (v1)</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Linear ODE integrator → POST /stem/run</li>
-              <li>Linear algebra solver → POST /algebra/run</li>
+              <li>Linear ODE integrator → <code>POST /stem/run</code></li>
+              <li>Linear algebra solver → <code>POST /algebra/run</code></li>
             </ul>
           </div>
-          <div className="space-y-1 text-sm text-neutral-700">
-            <p className="font-medium">Telemetry</p>
+
+          <div className="space-y-2 text-sm text-neutral-700">
+            <p className="font-medium">Metrics and counters</p>
             <p>
               <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
                 GET /metrics
@@ -58,16 +64,17 @@ export default function RicStemPage() {
               exposes:
             </p>
             <ul className="list-disc list-inside space-y-1">
-              <li>metrics.runs</li>
-              <li>metrics.replays</li>
-              <li>metrics.emitted</li>
-              <li>metrics.stem.odeRuns</li>
-              <li>metrics.stem.algebraRuns</li>
+              <li><code>metrics.runs</code> — total substrate runs</li>
+              <li><code>metrics.replays</code> — total replays</li>
+              <li><code>metrics.emitted</code> — emitted legal steps</li>
+              <li><code>metrics.stem.odeRuns</code> — ODE calls</li>
+              <li><code>metrics.stem.algebraRuns</code> — algebra calls</li>
             </ul>
           </div>
+
           <p className="text-xs text-neutral-600">
-            Same input → same output, bit-for-bit, across machines. No
-            floating-point drift in the core.
+            You can treat RIC-STEM as “deterministic math as a service” with
+            built-in usage counters and audit hooks.
           </p>
         </section>
 
@@ -85,9 +92,9 @@ export default function RicStemPage() {
             </code>
           </p>
 
-          <div className="space-y-1 text-sm text-neutral-700">
-            <p className="font-medium">Payload (example — 1D decay)</p>
-          </div>
+          <p className="text-sm text-neutral-700 font-medium">
+            Example — 1D exponential decay
+          </p>
 
           <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
 {`{
@@ -105,9 +112,7 @@ export default function RicStemPage() {
 }`}
           </pre>
 
-          <p className="text-sm text-neutral-700">
-            Response shape:
-          </p>
+          <p className="text-sm text-neutral-700">Response shape:</p>
 
           <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
 {`{
@@ -126,7 +131,7 @@ export default function RicStemPage() {
               <code className="text-[11px] bg-neutral-100 px-1 rounded">
                 y
               </code>{" "}
-              are floats derived from Q32 values; core integration is
+              are floats derived from Q32 values; the integrator itself runs in
               fixed-point.
             </li>
             <li>
@@ -140,7 +145,10 @@ export default function RicStemPage() {
               </code>
               .
             </li>
-            <li>Same request → identical arrays on any machine, any OS.</li>
+            <li>
+              If you replay this exact payload later, you get the same arrays on
+              any machine, any OS.
+            </li>
           </ul>
         </section>
 
@@ -159,7 +167,7 @@ export default function RicStemPage() {
           </p>
 
           <p className="text-sm text-neutral-700 font-medium">
-            Payload (example — 2×2 system)
+            Example — 2×2 system
           </p>
 
           <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
@@ -186,13 +194,13 @@ export default function RicStemPage() {
               <code className="text-[11px] bg-neutral-100 px-1 rounded">
                 y_q32
               </code>{" "}
-              are the raw Q32 substrate integers.
+              holds the raw fixed-point integers.
             </li>
             <li>
               <code className="text-[11px] bg-neutral-100 px-1 rounded">
                 y
               </code>{" "}
-              is a float convenience view.
+              is a float convenience view for humans.
             </li>
             <li>
               Each call increments{" "}
@@ -205,7 +213,10 @@ export default function RicStemPage() {
               </code>
               .
             </li>
-            <li>Deterministic across machines.</li>
+            <li>
+              Given the same payload, you always get the same solution vector,
+              bit-for-bit.
+            </li>
           </ul>
         </section>
 
@@ -213,13 +224,11 @@ export default function RicStemPage() {
 
         {/* 4. Observability */}
         <section className="space-y-3">
-          <h2 className="text-lg font-semibold">4. Observability</h2>
+          <h2 className="text-lg font-semibold">4. Observability and proofs</h2>
 
-          <div className="space-y-1 text-sm text-neutral-700">
+          <div className="space-y-2 text-sm text-neutral-700">
             <p className="font-medium">Metrics</p>
-            <p>
-              Query the substrate directly:
-            </p>
+            <p>Live substrate counters:</p>
           </div>
 
           <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
@@ -228,13 +237,13 @@ export default function RicStemPage() {
 
           <p className="text-sm text-neutral-700">
             This returns total runs, replays, emitted steps, and STEM-level
-            counters.
+            counters so you can see how the engine is being used.
           </p>
 
-          <div className="space-y-1 text-sm text-neutral-700">
-            <p className="font-medium">Trace / bundle infrastructure</p>
+          <div className="space-y-2 text-sm text-neutral-700">
+            <p className="font-medium">Replay and trace bundles</p>
             <p>
-              The core substrate still exposes{" "}
+              The underlying substrate exposes{" "}
               <code className="text-[11px] bg-neutral-100 px-1 rounded">
                 /run
               </code>{" "}
@@ -242,20 +251,40 @@ export default function RicStemPage() {
               <code className="text-[11px] bg-neutral-100 px-1 rounded">
                 /replay
               </code>{" "}
-              with LockGraph bundles:
+              endpoints that produce cryptographically hashed proof bundles
+              (including a graph of each step and its legality checks).
             </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>bundleHash</li>
-              <li>graphHash</li>
-              <li>Deterministic trace steps and legality reasons</li>
-              <li>Optional claims, provenance, signatures</li>
-            </ul>
             <p className="text-xs text-neutral-600">
-              RIC-STEM is layered above this substrate; future versions can
-              attach ODE/algebra steps directly to LockGraph for full STEM-level
-              legality proofs.
+              RIC-STEM sits on top of this. Future versions can attach ODE /
+              algebra runs directly into those bundles for end-to-end math
+              proofs.
             </p>
           </div>
+        </section>
+
+        <hr className="border-neutral-200" />
+
+        {/* 5. Deeper theory (optional) */}
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold">5. Deeper theory (optional)</h2>
+          <p className="text-sm text-neutral-700 leading-relaxed">
+            The broader mathematical framework behind RIC-STEM is described in
+            the Structured Resonance Dynamics corpus. A good starting point is:
+          </p>
+          <p className="text-sm text-neutral-800 underline underline-offset-2">
+            <a
+              href="https://zenodo.org/records/17545317"
+              target="_blank"
+              rel="noreferrer"
+            >
+              Structured Resonance Dynamics — Empirical Convergence Map →
+            </a>
+          </p>
+          <p className="text-xs text-neutral-600">
+            RIC-STEM v1 is built as a concrete, deterministic engine today; the
+            SRD work explores how the same coherence law extends across physics,
+            biology, and computation.
+          </p>
         </section>
 
         <hr className="border-neutral-200" />
