@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 type OdeResult = {
   ok: boolean;
@@ -49,7 +49,7 @@ export default function StemPage() {
   const [algLoading, setAlgLoading] = useState(false);
 
   // -------- ODE handler --------
-  async function runOde(e: React.FormEvent) {
+  async function runOde(e: FormEvent) {
     e.preventDefault();
     setOdeError(null);
     setOdeResult(null);
@@ -92,7 +92,7 @@ export default function StemPage() {
   }
 
   // -------- Algebra handler --------
-  async function runAlgebra(e: React.FormEvent) {
+  async function runAlgebra(e: FormEvent) {
     e.preventDefault();
     setAlgError(null);
     setAlgResult(null);
