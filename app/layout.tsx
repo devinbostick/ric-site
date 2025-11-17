@@ -4,22 +4,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Resonance Intelligence Core",
-  description: "Deterministic inference substrate.",
-  metadataBase: new URL("https://resonanceintelligencecore.com"),
+  description: "Deterministic inference, replayable legality.",
   icons: {
-    icon: "/favicon.svg", // point this at ric-spiral.svg or a copy of it
-  },
-  openGraph: {
-    title: "Resonance Intelligence Core",
-    description: "Deterministic inference, replayable legality.",
-    url: "https://resonanceintelligencecore.com",
-    siteName: "Resonance Intelligence Core",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Resonance Intelligence Core",
-    description: "Deterministic inference, replayable legality.",
+    icon: "/ric-spiral.svg",
+    shortcut: "/ric-spiral.svg",
+    apple: "/ric-spiral.svg",
   },
 };
 
@@ -30,7 +19,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-neutral-950 text-neutral-50 antialiased">
+      <body className="min-h-screen bg-neutral-950 text-neutral-50">
         {children}
       </body>
     </html>
