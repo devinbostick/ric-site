@@ -1,191 +1,288 @@
 // app/stem/page.tsx
+
 "use client";
 
 import { useState } from "react";
 
-type StemResult = unknown;
-
-type PresetKey = "ode_zero" | "ode_decay";
-
-const PRESET_LABELS: Record<PresetKey, string> = {
-  ode_zero: "Test ODE: y' = 0",
-  ode_decay: "Test ODE: y' = -y",
+type OdeResult = {
+  ok: boolean;
+  t: number[];
+  y: number[][];
 };
 
-const PRESET_BODIES: Record<PresetKey, any> = {
-  ode_zero: {
-    kind: "ode_linear",
-    system: {
-      // y' = 0
-      A: [[0]],
-      b: [0],
-    },
-    config: {
-      t0: 0,
-      t1: 1,
-      dt: 0.1,
-      y0: [0],
-    },
-  },
-  ode_decay: {
-    kind: "ode_linear",
-    system: {
-      // y' = -y  ⇒ A = [-1], b = [0]
-      A: [[-1]],
-      b: [0],
-    },
-    config: {
-      t0: 0,
-      t1: 3,
-      dt: 0.1,
-      y0: [1],
-    },
-  },
+type AlgebraResult = {
+  ok: boolean;
+  y_q32: string[];
+  y: number[];
 };
 
 export default function StemPage() {
-  const [activePreset, setActivePreset] = useState<PresetKey>("ode_zero");
-  const [result, setResult] = useState<StemResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // -------- ODE state --------
+  const [odePayload, setOdePayload] = useState<string>(
+    JSON.stringify(
+      {
+        kind: "ode_linear",
+        system: {
+          A: [[0]],
+          b: [0],
+        },
+        config: {
+          t0: 0,
+          t1: 1,
+          dt: 0.1,
+          y0: [0],
+        },
+      },
+      null,
+      2
+    )
+  );
+  const [odeResult, setOdeResult] = useState<OdeResult | null>(null);
+  const [odeError, setOdeError] = useState<string | null>(null);
+  const [odeLoading, setOdeLoading] = useState(false);
 
-  async function runPreset(kind: PresetKey) {
-    setActivePreset(kind);
-    setLoading(true);
-    setError(null);
-    setResult(null);
+  // -------- Algebra state --------
+  const [AInput, setAInput] = useState<string>("[[1,-1],[2,1]]");
+  const [bInput, setBInput] = useState<string>("[1,4]");
+  const [algResult, setAlgResult] = useState<AlgebraResult | null>(null);
+  const [algError, setAlgError] = useState<string | null>(null);
+  const [algLoading, setAlgLoading] = useState(false);
+
+  // -------- ODE handler --------
+  async function runOde(e: React.FormEvent) {
+    e.preventDefault();
+    setOdeError(null);
+    setOdeResult(null);
+    setOdeLoading(true);
 
     try {
-      const body = PRESET_BODIES[kind];
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(odePayload);
+      } catch {
+        setOdeError("Payload is not valid JSON");
+        setOdeLoading(false);
+        return;
+      }
 
       const res = await fetch("/api/stem-run", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+
+      const json = (await res.json()) as any;
+
+      if (!res.ok || !json.ok) {
+        setOdeError(json?.error?.message || "STEM ODE run failed");
+        setOdeLoading(false);
+        return;
+      }
+
+      setOdeResult({
+        ok: true,
+        t: json.t ?? [],
+        y: json.y ?? [],
+      });
+    } catch (err: any) {
+      setOdeError(err?.message || "Unexpected error");
+    } finally {
+      setOdeLoading(false);
+    }
+  }
+
+  // -------- Algebra handler --------
+  async function runAlgebra(e: React.FormEvent) {
+    e.preventDefault();
+    setAlgError(null);
+    setAlgResult(null);
+    setAlgLoading(true);
+
+    try {
+      let A: number[][];
+      let b: number[];
+
+      try {
+        A = JSON.parse(AInput);
+        b = JSON.parse(bInput);
+      } catch {
+        setAlgError("A or b is not valid JSON");
+        setAlgLoading(false);
+        return;
+      }
+
+      const body = {
+        system: {
+          A,
+          b,
+        },
+      };
+
+      const res = await fetch("/api/algebra-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify(body),
       });
 
-      const json = await res.json();
-      if (!res.ok) {
-        setError(
-          typeof json?.error?.message === "string"
-            ? json.error.message
-            : "STEM run failed"
-        );
-      } else {
-        setResult(json);
+      const json = (await res.json()) as any;
+
+      if (!res.ok || !json.ok) {
+        setAlgError(json?.error?.message || "Algebra solve failed");
+        setAlgLoading(false);
+        return;
       }
-    } catch (e: any) {
-      setError(e?.message || "Network error");
+
+      setAlgResult({
+        ok: true,
+        y_q32: json.y_q32 ?? [],
+        y: json.y ?? [],
+      });
+    } catch (err: any) {
+      setAlgError(err?.message || "Unexpected error");
     } finally {
-      setLoading(false);
+      setAlgLoading(false);
     }
   }
 
-  const presetBody = PRESET_BODIES[activePreset];
-
   return (
     <main className="min-h-screen flex flex-col items-center px-4 py-16">
-      <div className="w-full max-w-4xl space-y-10">
+      <div className="w-full max-w-5xl space-y-10">
         <header className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
             RIC-STEM v1
           </h1>
-          <p className="text-base md:text-lg leading-relaxed text-neutral-700">
-            Deterministic STEM engine: fixed-point Q32 ODE integration and
-            linear systems over a replayable resonance substrate.
+          <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
+            Deterministic STEM engine over the RIC substrate. Fixed-point
+            Q32 numerics, replayable runs, and legality-locked reasoning.
           </p>
         </header>
 
-        {/* Preset selector + request */}
+        {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
-          <div className="flex flex-wrap gap-3 items-center justify-between">
-            <div>
-              <h2 className="text-lg font-medium">
-                {PRESET_LABELS[activePreset]}
-              </h2>
-              <p className="text-sm text-neutral-600 mt-1 max-w-xl">
-                Choose a preset and run it through the RIC-STEM backend. The
-                request is sent to <code>/api/stem-run</code>, which proxies to
-                the deterministic substrate at <code>/stem/run</code>.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => runPreset("ode_zero")}
-                className={`px-3 py-1.5 text-sm rounded-full border ${
-                  activePreset === "ode_zero"
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-neutral-800 border-neutral-300"
-                }`}
-              >
-                y&apos; = 0
-              </button>
-              <button
-                type="button"
-                onClick={() => runPreset("ode_decay")}
-                className={`px-3 py-1.5 text-sm rounded-full border ${
-                  activePreset === "ode_decay"
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-neutral-800 border-neutral-300"
-                }`}
-              >
-                y&apos; = -y
-              </button>
-            </div>
-          </div>
+          <h2 className="text-xl font-semibold">1. ODE — Linear system</h2>
+          <p className="text-sm text-neutral-700">
+            Sends a linear ODE specification to RIC at{" "}
+            <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
+              /stem/run
+            </code>{" "}
+            via <code className="text-xs">/api/stem-run</code>. All integration
+            runs in fixed-point Q32 on the backend.
+          </p>
 
-          <div className="bg-black text-[13px] text-neutral-100 rounded-xl p-4 font-mono overflow-x-auto">
-            <div className="text-xs text-neutral-400 mb-2">
-              POST /api/stem-run
-            </div>
-            <pre className="whitespace-pre">
-              {JSON.stringify(presetBody, null, 2)}
-            </pre>
-          </div>
+          <form onSubmit={runOde} className="space-y-3">
+            <label className="block text-sm font-medium">
+              Request payload (JSON)
+            </label>
+            <textarea
+              className="w-full min-h-[160px] rounded-lg border px-3 py-2 text-sm font-mono bg-neutral-50"
+              value={odePayload}
+              onChange={(e) => setOdePayload(e.target.value)}
+            />
 
-          <button
-            type="button"
-            onClick={() => runPreset(activePreset)}
-            className="inline-flex items-center justify-center px-4 py-2.5 rounded-full bg-black text-white text-sm font-medium hover:bg-neutral-900 disabled:opacity-60 disabled:cursor-not-allowed"
-            disabled={loading}
-          >
-            {loading ? "Running…" : "Run preset"}
-          </button>
-        </section>
+            <button
+              type="submit"
+              disabled={odeLoading}
+              className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
+            >
+              {odeLoading ? "Running…" : "Run ODE"}
+            </button>
+          </form>
 
-        {/* Result */}
-        <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-3">
-          <h2 className="text-lg font-medium">Result</h2>
-          {error && (
-            <div className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800">
-              {error}
-            </div>
-          )}
-          {!error && !result && (
-            <p className="text-sm text-neutral-600">
-              Run a preset to view the deterministic solution.
+          {odeError && (
+            <p className="text-sm text-red-600 whitespace-pre-wrap">
+              {odeError}
             </p>
           )}
-          {result && (
-            <div className="bg-neutral-950 text-[13px] text-neutral-100 rounded-xl p-4 font-mono overflow-x-auto max-h-[360px]">
-              <pre className="whitespace-pre">
-                {JSON.stringify(result, null, 2)}
-              </pre>
+
+          {odeResult && (
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">t (time grid)</div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(odeResult.t, null, 2)}
+                </pre>
+              </div>
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">y(t) (state)</div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(odeResult.y, null, 2)}
+                </pre>
+              </div>
             </div>
           )}
         </section>
 
-        {/* Determinism card */}
-        <section className="border rounded-2xl p-5 md:p-6 bg-neutral-50 space-y-2">
-          <h2 className="text-base font-medium">Determinism</h2>
+        {/* Algebra card */}
+        <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
+          <h2 className="text-xl font-semibold">2. Algebra — Linear solver</h2>
           <p className="text-sm text-neutral-700">
-            RIC-STEM integrates these systems in fixed-point Q32 on the server.
-            The <code>t</code> and <code>y</code> arrays shown above are
-            float projections of the same underlying Q32 sequence. The same
-            request body will produce identical outputs on any machine that
-            runs this substrate.
+            Solves <code>Ax = b</code> deterministically at{" "}
+            <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
+              /algebra/run
+            </code>{" "}
+            via <code className="text-xs">/api/algebra-run</code>. Backend
+            outputs both Q32 integers and float representations.
           </p>
+
+          <form onSubmit={runAlgebra} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Matrix A (JSON, e.g. [[1,-1],[2,1]])
+                </label>
+                <textarea
+                  className="w-full min-h-[80px] rounded-lg border px-3 py-2 text-sm font-mono bg-neutral-50"
+                  value={AInput}
+                  onChange={(e) => setAInput(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  Vector b (JSON, e.g. [1,4])
+                </label>
+                <textarea
+                  className="w-full min-h-[80px] rounded-lg border px-3 py-2 text-sm font-mono bg-neutral-50"
+                  value={bInput}
+                  onChange={(e) => setBInput(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={algLoading}
+              className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
+            >
+              {algLoading ? "Solving…" : "Solve Ax = b"}
+            </button>
+          </form>
+
+          {algError && (
+            <p className="text-sm text-red-600 whitespace-pre-wrap">
+              {algError}
+            </p>
+          )}
+
+          {algResult && (
+            <div className="mt-3 grid gap-3 md:grid-cols-2">
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">
+                  Solution x in Q32 (raw ints)
+                </div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(algResult.y_q32, null, 2)}
+                </pre>
+              </div>
+              <div className="text-xs font-mono bg-neutral-50 rounded-lg p-3 border">
+                <div className="font-semibold mb-1">
+                  Solution x as floats
+                </div>
+                <pre className="whitespace-pre-wrap break-all">
+                  {JSON.stringify(algResult.y, null, 2)}
+                </pre>
+              </div>
+            </div>
+          )}
         </section>
       </div>
     </main>
