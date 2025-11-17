@@ -290,7 +290,7 @@ export default function RicStemPage() {
         <hr className="border-neutral-200" />
 
         {/* Links back */}
-        <section className="flex flex-wrap gap-4 text-xs text-neutral-700">
+        <section className="flex flex-col gap-4 text-xs text-neutral-700">
           <Link href="/stem" className="underline underline-offset-2">
             Open the RIC-STEM demo →
           </Link>
@@ -300,7 +300,21 @@ export default function RicStemPage() {
           <Link href="/" className="underline underline-offset-2">
             Back to home →
           </Link>
-        </section>
+
+          <div className="pt-6 text-neutral-500">
+            <p className="font-medium">Research background</p>
+            <p className="mt-1">
+              For the underlying deterministic coherence theory behind RIC, see the
+              <a
+                href="https://zenodo.org/records/17545317"
+                target="_blank"
+                className="underline underline-offset-2 text-neutral-700"
+              >
+                Empirical Convergence Map for CODES (15,000+ downloads) →
+            </a>
+          </p>
+        </div>
+       </section>
       </div>
     </main>
   );
