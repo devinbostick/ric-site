@@ -220,8 +220,19 @@ export default function DemoPage() {
             RIC decides if the model is allowed to answer. Deterministic hashes,
             temporal law, and repeatable decisions.
           </p>
-        </div>
-      </header>
+          <p className="mt-1 text-xs text-slate-500">
+            Live web demo:{" "}
+          <a
+            href="https://resonanceintelligencecore.com/legality-demo"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2"
+          >
+            resonanceintelligencecore.com/legality-demo
+          </a>
+        </p>
+      </div>
+    </header>
 
       <main className="flex-1 flex gap-4 px-8 py-4">
         {/* LEFT SIDE — INPUTS */}
