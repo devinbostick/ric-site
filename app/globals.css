@@ -2,19 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Force light-mode so iOS doesn't auto-darken inputs */
 :root {
+  /* force light-style form controls so iOS doesn't make inputs black */
   color-scheme: light;
 }
 
 html,
 body {
   height: 100%;
-  overflow-x: hidden; /* prevent sideways sliding on mobile */
+  overflow-x: hidden;
 }
 
 /* center images in markdown */
 .prose img {
   margin: 1.25rem auto;
   display: block;
+}
+
+/* ensure inputs/textareas stay light on mobile */
+input,
+textarea {
+  background-color: #ffffff;
+  color: #020617; /* slate-900 */
 }
