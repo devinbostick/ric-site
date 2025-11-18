@@ -45,7 +45,6 @@ export default function BundlePageClient({ id }: BundlePageClientProps) {
 
         setRawBundle(json);
 
-        // Try to extract key fields defensively
         const graph = json.graph ?? {};
         const nodes = Array.isArray(graph.nodes) ? graph.nodes : [];
         const edges = Array.isArray(graph.edges) ? graph.edges : [];
@@ -62,9 +61,8 @@ export default function BundlePageClient({ id }: BundlePageClientProps) {
         setSummary(s);
       } catch (err: unknown) {
         if (!cancelled) {
-            const message =
-                err instanceof Error ? err.message : String(err);
-            setErrorMsg(message);
+          const message = err instanceof Error ? err.message : String(err);
+          setErrorMsg(message);
         }
       } finally {
         if (!cancelled) {
@@ -82,39 +80,26 @@ export default function BundlePageClient({ id }: BundlePageClientProps) {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-50">
       <div className="mx-auto max-w-5xl px-4 py-8 md:py-10">
-        {/* Header */}
-        <header className="mb-6 flex items-center justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-              RIC proof bundle
-            </p>
-            <h1 className="mt-1 text-2xl md:text-3xl font-semibold tracking-tight">
-              Deterministic bundle for run&nbsp;
-              <span className="font-mono text-sm md:text-base text-slate-300">
-                {id}
-              </span>
-            </h1>
-            <p className="mt-2 text-xs md:text-sm text-slate-400 max-w-2xl">
-              This page shows the proof bundle returned by the RIC substrate for
-              a single run ID. The same inputs on the same version of RIC
-              produce the same bundle, bit-for-bit.
-            </p>
-          </div>
 
-          <div className="text-right space-y-1 text-[11px] text-slate-400">
-            <div>
-              <span className="font-semibold text-slate-200">
-                Deterministic substrate
-              </span>
-              <span className="mx-1">·</span>
-              Q32 fixed-point, no floats/time/random.
+        {/* Header (mobile-safe improved version) */}
+        <header className="mb-8 flex flex-col gap-3 px-1 pt-2 md:flex-row md:items-center md:justify-between md:px-0 md:pt-0">
+          <h1 className="text-2xl font-semibold text-neutral-100 md:text-3xl">
+            Deterministic bundle for run{" "}
+            <span className="font-mono text-sm text-neutral-300">{id}</span>
+          </h1>
+
+          <div className="text-right text-xs text-neutral-300 md:text-sm">
+            Deterministic substrate · Q32 fixed-point,
+            <br className="md:hidden" />
+            no floats/time/random.
+            <div className="mt-2">
+              <Link
+                href="/demo"
+                className="inline-flex items-center justify-center rounded-full border border-slate-600 px-3 py-1 text-[11px] font-semibold hover:bg-slate-800"
+              >
+                Back to legality demo
+              </Link>
             </div>
-            <Link
-              href="/demo"
-              className="inline-flex items-center justify-center rounded-full border border-slate-600 px-3 py-1 text-[11px] font-semibold hover:bg-slate-800"
-            >
-              Back to legality demo
-            </Link>
           </div>
         </header>
 
@@ -210,7 +195,6 @@ export default function BundlePageClient({ id }: BundlePageClientProps) {
           </section>
         )}
 
-        {/* If nothing loaded and no error */}
         {!loading && !errorMsg && !rawBundle && (
           <p className="text-xs text-slate-400">
             No bundle data returned for this ID.

@@ -6,6 +6,12 @@ Format:
 - Newest versions at top
 - One section per tagged release
 
+## v0.1.0-demo-docs — 2025-11-18
+- Added full documentation stack.
+- Added docs/ (stem.md, ric-api.md, legality.md, bundle-format.md).
+- Updated README with production deployment details.
+- Added CONTRIBUTING.md and DEV_SETUP.md.
+
 ---
 
 ## v0.1.0-demo — 2025-11-18

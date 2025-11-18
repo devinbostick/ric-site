@@ -74,9 +74,6 @@ export default function DemoPage() {
   const [replayNote, setReplayNote] = useState<string | null>(null);
   const [replayDetail, setReplayDetail] = useState<any | null>(null);
 
-  // ------------------------
-  // Scenario selection
-  // ------------------------
   const applyScenario = (s: Scenario) => {
     setSelectedScenario(s);
     setClaimText(JSON.stringify(s.claim, null, 2));
@@ -88,9 +85,6 @@ export default function DemoPage() {
     setErrorMsg(null);
   };
 
-  // ------------------------
-  // Helpers
-  // ------------------------
   const parseClaim = (): any | null => {
     try {
       return JSON.parse(claimText);
@@ -208,15 +202,11 @@ export default function DemoPage() {
     }
   };
 
-  // ------------------------
-  // UI
-  // ------------------------
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-      {/* HEADER */}
-      <header className="border-b border-slate-200 px-8 py-4 flex items-center justify-between">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+      <header className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div>
-          <h1 className="text-xl font-semibold tracking-tight">
+          <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
             RIC Demo — Deterministic Gating Layer
           </h1>
           <p className="text-sm text-slate-500">
@@ -224,7 +214,7 @@ export default function DemoPage() {
             temporal law, and repeatable decisions.
           </p>
           <p className="mt-1 text-xs text-slate-500">
-            Live web demo:{" "}
+            Legality overview:{" "}
             <a
               href="https://resonanceintelligencecore.com/legality-demo"
               target="_blank"
@@ -235,14 +225,26 @@ export default function DemoPage() {
             </a>
           </p>
         </div>
+
+        <div className="text-xs text-slate-500 lg:text-right">
+          Deterministic substrate · Q32 fixed-point, no floats/time/random.
+          <div className="mt-1">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center rounded-full border border-slate-300 px-3 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-100"
+            >
+              Back to RIC home
+            </Link>
+          </div>
+        </div>
       </header>
 
-      <main className="flex-1 flex gap-4 px-8 py-4">
+      <main className="flex flex-1 flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:px-8">
         {/* LEFT SIDE — INPUTS */}
-        <div className="w-1/2 flex flex-col gap-4">
+        <div className="flex w-full flex-col gap-4 lg:w-1/2">
           {/* Scenario selector */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
               Scenarios
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -251,10 +253,10 @@ export default function DemoPage() {
                   key={s.label}
                   onClick={() => applyScenario(s)}
                   className={
-                    "text-xs px-3 py-1 rounded-full border transition-all " +
+                    "rounded-full border px-3 py-1 text-xs transition-all " +
                     (selectedScenario?.label === s.label
-                      ? "bg-slate-900 text-white border-slate-900"
-                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-400")
+                      ? "border-slate-900 bg-slate-900 text-white"
+                      : "border-slate-200 bg-white text-slate-700 hover:border-slate-400")
                   }
                 >
                   {s.label}
@@ -264,33 +266,33 @@ export default function DemoPage() {
           </div>
 
           {/* Claim JSON */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex-1 flex flex-col">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide mb-2">
+          <div className="flex flex-1 flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
               Claim JSON
             </h2>
             <textarea
-              className="font-mono text-xs border border-slate-200 rounded-lg p-2 flex-1 resize-none outline-none focus:ring-1 focus:ring-slate-400"
+              className="flex-1 resize-none rounded-lg border border-slate-200 bg-white p-2 font-mono text-xs outline-none focus:ring-1 focus:ring-slate-400"
               value={claimText}
               onChange={(e) => setClaimText(e.target.value)}
             />
           </div>
 
           {/* Question + Buttons */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col gap-3">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Question
             </h2>
             <input
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-slate-400"
+              className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-slate-400"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
             />
 
-            <div className="flex gap-3 mt-2">
+            <div className="mt-2 flex flex-wrap gap-3">
               <button
                 onClick={runRicDemo}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50"
+                className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
               >
                 {loading ? "Running…" : "Run with RIC gating"}
               </button>
@@ -298,7 +300,7 @@ export default function DemoPage() {
               <button
                 onClick={runRawClaude}
                 disabled={loading}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-white text-slate-800 border border-slate-300 hover:border-slate-500 disabled:opacity-50"
+                className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-800 hover:border-slate-500 disabled:opacity-50"
               >
                 Raw Claude
               </button>
@@ -311,28 +313,28 @@ export default function DemoPage() {
         </div>
 
         {/* RIGHT SIDE — OUTPUTS */}
-        <div className="w-1/2 flex flex-col gap-4">
-          {/* --- RIC Decision Block --- */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+        <div className="flex w-full flex-col gap-4 lg:w-1/2">
+          {/* RIC Decision */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               RIC Substrate Decision (Deterministic)
             </h2>
 
             {!response && (
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="mt-1 text-xs text-slate-500">
                 Run the demo to see deterministic gating and repeatable hashes.
               </p>
             )}
 
             {response && (
-              <div className="space-y-4 mt-2">
-                {/* PASS / HALT Banner */}
+              <div className="mt-2 space-y-4">
+                {/* PASS / HALT banner */}
                 <div
                   className={
-                    "rounded-lg px-3 py-3 text-sm font-medium shadow-sm " +
+                    "rounded-xl px-3 py-3 text-sm font-medium shadow-sm " +
                     (response.decision === "PASS"
-                      ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
-                      : "bg-rose-50 text-rose-800 border border-rose-200")
+                      ? "border border-emerald-200 bg-emerald-50 text-emerald-800"
+                      : "border border-rose-200 bg-rose-50 text-rose-800")
                   }
                 >
                   {response.decision === "PASS"
@@ -340,57 +342,55 @@ export default function DemoPage() {
                     : "HALT — Substrate blocks model output"}
 
                   {response.reason && (
-                    <div className="text-xs mt-1 opacity-80">
+                    <div className="mt-1 text-xs opacity-80">
                       Reason: {response.reason}
                     </div>
                   )}
                 </div>
 
                 {/* Model call status */}
-                <div className="text-[11px] text-slate-600 border border-dashed border-slate-300 rounded-md px-3 py-2 bg-slate-50/60 flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-2 text-[11px] text-slate-600">
                   <span className="font-semibold uppercase tracking-wide">
                     Model call:
                   </span>
                   {response.decision === "PASS" ? (
-                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-300">
+                    <span className="inline-flex items-center rounded-full border border-emerald-300 bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800">
                       EXECUTED (allowed by substrate)
                     </span>
                   ) : (
-                    <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800 border border-rose-300">
+                    <span className="inline-flex items-center rounded-full border border-rose-300 bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800">
                       SKIPPED (HALT blocked model)
                     </span>
                   )}
                 </div>
 
-                {/* Deterministic Hashes */}
+                {/* Hashes */}
                 <div className="grid grid-cols-1 gap-2 text-xs font-mono">
                   <div>
-                    <div className="text-slate-500 uppercase tracking-wide text-[10px]">
-                      ProposalHash
+                    <div className="text-[10px] uppercase tracking-wide text-slate-500">
+                      proposalHash
                     </div>
                     <div className="break-all">{response.proposalHash}</div>
                   </div>
-
                   <div>
-                    <div className="text-slate-500 uppercase tracking-wide text-[10px]">
-                      PromptHash
+                    <div className="text-[10px] uppercase tracking-wide text-slate-500">
+                      promptHash
                     </div>
                     <div className="break-all">{response.promptHash}</div>
                   </div>
-
                   <div>
-                    <div className="text-slate-500 uppercase tracking-wide text-[10px]">
-                      Version
+                    <div className="text-[10px] uppercase tracking-wide text-slate-500">
+                      version
                     </div>
                     <div>{response.version}</div>
                   </div>
                 </div>
 
-                {/* Proof Bundle (optional) */}
+                {/* Proof bundle */}
                 {response.ricBundle && (
                   <div className="space-y-2 text-[11px] font-mono">
                     <div>
-                      <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                      <div className="text-[10px] uppercase tracking-wide text-slate-500">
                         RIC Run ID
                       </div>
                       <div className="break-all">{response.ricBundle.id}</div>
@@ -398,12 +398,14 @@ export default function DemoPage() {
 
                     {response.ricBundle.id && (
                       <div>
-                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                        <div className="text-[10px] uppercase tracking-wide text-slate-500">
                           Bundle URL
                         </div>
                         <div className="break-all">
                           <Link
-                            href={`/bundle/${encodeURIComponent(response.ricBundle.id)}`}
+                            href={`/bundle/${encodeURIComponent(
+                              response.ricBundle.id,
+                            )}`}
                             className="underline underline-offset-2"
                           >
                             /bundle/{response.ricBundle.id}
@@ -414,7 +416,7 @@ export default function DemoPage() {
 
                     {response.ricBundle.graphHash && (
                       <div>
-                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                        <div className="text-[10px] uppercase tracking-wide text-slate-500">
                           graphHash
                         </div>
                         <div className="break-all">
@@ -425,7 +427,7 @@ export default function DemoPage() {
 
                     {response.ricBundle.bundleHash && (
                       <div>
-                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                        <div className="text-[10px] uppercase tracking-wide text-slate-500">
                           bundleHash
                         </div>
                         <div className="break-all">
@@ -438,18 +440,18 @@ export default function DemoPage() {
                       <summary className="cursor-pointer text-xs text-slate-600">
                         View full RIC bundle payload
                       </summary>
-                      <pre className="mt-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto">
+                      <pre className="mt-2 max-h-64 overflow-auto rounded-lg border border-slate-200 bg-slate-50 p-2 text-[10px]">
                         {JSON.stringify(response.ricBundle, null, 2)}
                       </pre>
                     </details>
                   </div>
                 )}
 
-                {/* Replay button */}
+                {/* Replay */}
                 <button
                   onClick={replayDeterministically}
                   disabled={loading || !response}
-                  className="text-xs px-3 py-1 rounded-md bg-slate-100 border border-slate-300 w-fit hover:bg-slate-200 disabled:opacity-50"
+                  className="w-fit rounded-md border border-slate-300 bg-slate-100 px-3 py-1 text-xs hover:bg-slate-200 disabled:opacity-50"
                 >
                   Replay deterministically (Q32)
                 </button>
@@ -471,8 +473,8 @@ export default function DemoPage() {
                           className={
                             "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border " +
                             (replayDetail.matchProposal
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                              : "bg-rose-50 text-rose-800 border-rose-200")
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                              : "border-rose-200 bg-rose-50 text-rose-800")
                           }
                         >
                           proposalHash{" "}
@@ -482,8 +484,8 @@ export default function DemoPage() {
                           className={
                             "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border " +
                             (replayDetail.matchPrompt
-                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
-                              : "bg-rose-50 text-rose-800 border-rose-200")
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                              : "border-rose-200 bg-rose-50 text-rose-800")
                           }
                         >
                           promptHash{" "}
@@ -492,14 +494,7 @@ export default function DemoPage() {
                       </div>
                     </div>
 
-                    <pre
-                      className="
-                        mt-2 text-[11px]
-                        bg-slate-50 border border-slate-200 rounded-lg
-                        p-2 max-h-64 overflow-auto
-                        whitespace-pre-wrap break-all
-                      "
-                    >
+                    <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap break-all rounded-lg border border-slate-200 bg-slate-50 p-2 text-[11px]">
                       {JSON.stringify(replayDetail, null, 2)}
                     </pre>
                   </>
@@ -508,10 +503,10 @@ export default function DemoPage() {
             )}
           </div>
 
-          {/* --- Claude Output (RIC-Gated) --- */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
-              Claude Output (RIC-Gated)
+          {/* Claude output (RIC-gated) */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
+              Claude Output (RIC-gated)
             </h2>
 
             {!response && (
@@ -521,21 +516,21 @@ export default function DemoPage() {
             )}
 
             {response && response.decision === "PASS" && response.claude && (
-              <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto mt-2">
+              <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
                 {response.claude.text}
               </pre>
             )}
 
             {response && response.decision === "HALT" && (
-              <p className="text-xs text-slate-600 mt-2">
+              <p className="mt-2 text-xs text-slate-600">
                 Model call blocked. No output generated.
               </p>
             )}
           </div>
 
-          {/* --- Raw Claude --- */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
-            <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wide">
+          {/* Raw Claude */}
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">
               Raw Model Output (Unconstrained)
             </h2>
 
@@ -546,7 +541,7 @@ export default function DemoPage() {
             )}
 
             {rawClaude && (
-              <pre className="text-xs whitespace-pre-wrap bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto mt-2">
+              <pre className="mt-2 max-h-64 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
                 {rawClaude}
               </pre>
             )}
