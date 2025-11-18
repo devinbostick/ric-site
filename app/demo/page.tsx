@@ -4,6 +4,12 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
 
 type DemoResponse = {
   decision: "PASS" | "HALT";
@@ -265,17 +271,21 @@ export default function DemoPage() {
             </div>
           </div>
 
-          {/* Claim JSON */}
-          <div className="flex flex-1 flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
-              Claim JSON
-            </h2>
-            <textarea
-              className="flex-1 resize-none rounded-lg border border-slate-200 bg-white p-2 font-mono text-xs outline-none focus:ring-1 focus:ring-slate-400"
-              value={claimText}
-              onChange={(e) => setClaimText(e.target.value)}
-            />
-          </div>
+          {/* CLAIM JSON */}
+          <Card className="h-full">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-semibold tracking-tight">
+                CLAIM JSON
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pb-4">
+              <div className="rounded-xl border bg-slate-50 px-3 py-2 h-[230px] overflow-auto">
+                <pre className="whitespace-pre text-[11px] leading-snug text-slate-900">
+                  {formattedClaimJson}
+                </pre>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Question + Buttons */}
           <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
