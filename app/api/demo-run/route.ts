@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import crypto from "node:crypto";
+
+type ModelProvider = "anthropic" | "openai";
+
+const MODEL_PROVIDER: ModelProvider =
+  (process.env.MODEL_PROVIDER as ModelProvider) ?? "anthropic";
 
 type Claim = {
   policy_effective_date: string; // "YYYY-MM-DD"
@@ -22,14 +28,14 @@ type DemoResponse = {
     graphHash?: string;
     bundleHash?: string;
   };
-  claude?: { text: string };
+  claude?: { text: string }; // kept for backwards compatibility (now generic model text)
 };
 
 const VERSION = "0.1.0";
 
 // Prefer RIC_API_BASE, then RIC_URL, then NEXT_PUBLIC_RIC_URL, then local
 const RIC_URL =
-  process.env.RIC_API_BASE || 
+  process.env.RIC_API_BASE ||
   process.env.RIC_URL ||
   process.env.NEXT_PUBLIC_RIC_URL ||
   "http://localhost:8787";
@@ -101,16 +107,16 @@ async function runRic(payload: any): Promise<{ id: string; emitted: number }> {
 }
 
 // ------------------------
-// Claude call (gated)
+// Model calls (Anthropic / OpenAI)
 // ------------------------
 
-async function callClaude(claim: Claim, question: string): Promise<string> {
+async function callAnthropic(claim: Claim, question: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   const model = process.env.ANTHROPIC_MODEL || "claude-3-5-sonnet-latest";
 
   if (!apiKey) {
     return [
-      "Set ANTHROPIC_API_KEY in the environment to call Claude.\n",
+      "[ANTHROPIC STUB] Set ANTHROPIC_API_KEY in the environment.\n",
       "Stub response for demo:",
       `Claim: ${JSON.stringify(claim)}`,
       `Question: ${question}`,
@@ -147,6 +153,61 @@ async function callClaude(claim: Claim, question: string): Promise<string> {
     .trim();
 
   return text;
+}
+
+async function callOpenAI(claim: Claim, question: string): Promise<string> {
+  const apiKey = process.env.OPENAI_API_KEY;
+  const model = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+
+  if (!apiKey) {
+    return [
+      "[OPENAI STUB] Set OPENAI_API_KEY in the environment.\n",
+      "Stub response for demo:",
+      `Claim: ${JSON.stringify(claim)}`,
+      `Question: ${question}`,
+    ].join("\n");
+  }
+
+  const client = new OpenAI({ apiKey });
+
+  const resp = await client.responses.create({
+    model,
+    max_output_tokens: 512,
+    input: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_text",
+            text:
+              "You are an insurance claims analyst. " +
+              "Given a structured JSON claim and a question, answer carefully.\n\n" +
+              `Claim JSON:\n${JSON.stringify(claim, null, 2)}\n\n` +
+              `Question: ${question}\n\n` +
+              "Explain your reasoning step by step, then give a clear YES/NO at the end.",
+          },
+        ],
+      },
+    ],
+  });
+
+  const parts = resp.output[0]?.content ?? [];
+  const text = parts
+    .map((c: any) => (c.type === "output_text" ? c.text : ""))
+    .join("\n")
+    .trim();
+
+  return text;
+}
+
+async function callModel(claim: Claim, question: string): Promise<string> {
+  if (MODEL_PROVIDER === "anthropic") {
+    return callAnthropic(claim, question);
+  }
+  if (MODEL_PROVIDER === "openai") {
+    return callOpenAI(claim, question);
+  }
+  throw new Error(`Unsupported MODEL_PROVIDER: ${MODEL_PROVIDER}`);
 }
 
 // ------------------------
@@ -188,10 +249,10 @@ export async function POST(req: Request) {
       emitted: runResult.emitted,
     };
 
-    // 4) If PASS, call Claude; if HALT, skip model
-    let claudeText: string | undefined;
+    // 4) If PASS, call model; if HALT, skip model
+    let modelText: string | undefined;
     if (gate.decision === "PASS") {
-      claudeText = await callClaude(claim, question);
+      modelText = await callModel(claim, question);
     }
 
     const resp: DemoResponse = {
@@ -201,7 +262,7 @@ export async function POST(req: Request) {
       promptHash,
       version: VERSION,
       ricBundle,
-      claude: claudeText ? { text: claudeText } : undefined,
+      claude: modelText ? { text: modelText } : undefined,
     };
 
     return NextResponse.json(resp);

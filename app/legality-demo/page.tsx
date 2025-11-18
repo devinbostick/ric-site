@@ -18,6 +18,11 @@ export default function LegalityDemoPage() {
             hard rules and either lets an answer emit or halts it, with a
             replayable proof of what happened.
           </p>
+          <p className="text-[11px] text-neutral-400 max-w-2xl">
+            The downstream text model (Anthropic, OpenAI, or another provider)
+            is swappable. The legality decision stays fixed and replayable for
+            the same inputs.
+          </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
             <Link
@@ -42,8 +47,8 @@ export default function LegalityDemoPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-semibold">1. What the user sees</h2>
               <p className="text-sm text-neutral-200 leading-relaxed">
-                In the UI you type a prompt: a legal question, a policy request,
-                or any free-text query.
+                In the UI you type a prompt: a legal question, a policy
+                request, or any free-text query.
               </p>
               <ul className="list-disc list-inside text-sm text-neutral-200 space-y-1.5">
                 <li>You write a question and hit send.</li>
@@ -100,7 +105,7 @@ export default function LegalityDemoPage() {
                   reasons. You can replay it later and get the same result.
                 </li>
                 <li>
-                  <span className="font-semibold">Safety & compliance:</span>{" "}
+                  <span className="font-semibold">Safety &amp; compliance:</span>{" "}
                   Encode rules that must never be violated.
                 </li>
                 <li>

@@ -264,7 +264,7 @@ export default function RicStemPage() {
 
         <hr className="border-neutral-200" />
 
-        {/* 5. Deeper theory (optional) */}
+        {/* 5. Deeper theory */}
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">5. Deeper theory (optional)</h2>
           <p className="text-sm text-neutral-700 leading-relaxed">
