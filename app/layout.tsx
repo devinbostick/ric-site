@@ -10,6 +10,24 @@ export const metadata: Metadata = {
     shortcut: "/ric-icon.svg",
     apple: "/ric-icon.svg",
   },
+  openGraph: {
+    title: "Resonance Intelligence Core",
+    description: "Deterministic inference, replayable legality.",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: "RIC",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Resonance Intelligence Core",
+    description: "Deterministic inference, replayable legality.",
+    images: ["/og.png"],
+  },
 };
 
 export default function RootLayout({
