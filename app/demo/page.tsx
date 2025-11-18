@@ -209,7 +209,7 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 overflow-x-hidden">
       <header className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div>
           <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
@@ -279,10 +279,13 @@ export default function DemoPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="pb-4">
-              <div className="rounded-xl border bg-slate-50 px-3 py-2 h-[230px] overflow-auto">
-                <pre className="whitespace-pre text-[11px] leading-snug text-slate-900">
-                  {formattedClaimJson}
-                </pre>
+              <div className="h-[230px] rounded-xl border bg-slate-50 px-3 py-2">
+                <textarea
+                  className="h-full w-full resize-none bg-transparent font-mono text-[11px] leading-snug text-slate-900 outline-none"
+                  value={claimText}
+                  onChange={(e) => setClaimText(e.target.value)}
+                  spellCheck={false}
+                />
               </div>
             </CardContent>
           </Card>

@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: light dark; }
-html, body { height: 100%; }
-.prose img { margin: 1.25rem auto; display:block; }
+:root {
+  color-scheme: light dark;
+}
+
+html,
+body {
+  height: 100%;
+  overflow-x: hidden; /* prevent sideways sliding on mobile */
+}
+
+/* center images in markdown */
+.prose img {
+  margin: 1.25rem auto;
+  display: block;
+}
