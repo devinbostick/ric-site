@@ -158,7 +158,7 @@ export default function DemoPage() {
       const matchPrompt = json.promptHash === prevPrompt;
 
       setReplayNote(
-        `Replayed in RIC v2 (Q32 fixed–point, no floats/time/random). ` +
+        `Replayed in RIC v2 (Q32 fixed-point, no floats/time/random). ` +
           (matchProposal && matchPrompt
             ? "Hashes are identical."
             : "Hashes changed (determinism violation)."),
@@ -224,17 +224,17 @@ export default function DemoPage() {
           </p>
           <p className="mt-1 text-xs text-slate-500">
             Live web demo:{" "}
-          <a
-            href="https://resonanceintelligencecore.com/legality-demo"
-            target="_blank"
-            rel="noreferrer"
-            className="underline underline-offset-2"
-          >
-            resonanceintelligencecore.com/legality-demo
-          </a>
-        </p>
-      </div>
-    </header>
+            <a
+              href="https://resonanceintelligencecore.com/legality-demo"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-2"
+            >
+              resonanceintelligencecore.com/legality-demo
+            </a>
+          </p>
+        </div>
+      </header>
 
       <main className="flex-1 flex gap-4 px-8 py-4">
         {/* LEFT SIDE — INPUTS */}
@@ -345,6 +345,22 @@ export default function DemoPage() {
                   )}
                 </div>
 
+                {/* Model call status */}
+                <div className="text-[11px] text-slate-600 border border-dashed border-slate-300 rounded-md px-3 py-2 bg-slate-50/60 flex items-center gap-2">
+                  <span className="font-semibold uppercase tracking-wide">
+                    Model call:
+                  </span>
+                  {response.decision === "PASS" ? (
+                    <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-800 border border-emerald-300">
+                      EXECUTED (allowed by substrate)
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-semibold text-rose-800 border border-rose-300">
+                      SKIPPED (HALT blocked model)
+                    </span>
+                  )}
+                </div>
+
                 {/* Deterministic Hashes */}
                 <div className="grid grid-cols-1 gap-2 text-xs font-mono">
                   <div>
@@ -370,28 +386,28 @@ export default function DemoPage() {
                 </div>
 
                 {/* Proof Bundle (optional) */}
-                  {response.ricBundle && (
-                    <div className="space-y-2 text-[11px] font-mono">
+                {response.ricBundle && (
+                  <div className="space-y-2 text-[11px] font-mono">
+                    <div>
+                      <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                        RIC Run ID
+                      </div>
+                      <div className="break-all">{response.ricBundle.id}</div>
+                    </div>
+
+                    {response.ricBundle.graphHash && (
                       <div>
                         <div className="text-slate-500 uppercase tracking-wide text-[10px]">
-                          RIC Run ID
+                          graphHash
                         </div>
-                        <div className="break-all">{response.ricBundle.id}</div>
+                        <div className="break-all">
+                          {response.ricBundle.graphHash}
+                        </div>
                       </div>
+                    )}
 
-                      {response.ricBundle.graphHash && (
-                        <div>
-                          <div className="text-slate-500 uppercase tracking-wide text-[10px]">
-                            graphHash
-                          </div>
-                          <div className="break-all">
-                            {response.ricBundle.graphHash}
-                          </div>
-                        </div>
-                      )}
-
-                      {response.ricBundle.bundleHash && (
-                        <div>
+                    {response.ricBundle.bundleHash && (
+                      <div>
                         <div className="text-slate-500 uppercase tracking-wide text-[10px]">
                           bundleHash
                         </div>
@@ -399,14 +415,14 @@ export default function DemoPage() {
                           {response.ricBundle.bundleHash}
                         </div>
                       </div>
-                     )}
+                    )}
 
                     <details>
                       <summary className="cursor-pointer text-xs text-slate-600">
                         View full RIC bundle payload
                       </summary>
                       <pre className="mt-2 text-[10px] bg-slate-50 border border-slate-200 rounded-lg p-2 max-h-64 overflow-auto">
-                       {JSON.stringify(response.ricBundle, null, 2)}
+                        {JSON.stringify(response.ricBundle, null, 2)}
                       </pre>
                     </details>
                   </div>
@@ -428,16 +444,48 @@ export default function DemoPage() {
                 )}
 
                 {replayDetail && (
-                  <pre
-                    className="
-                      mt-2 text-[11px]
-                      bg-slate-50 border border-slate-200 rounded-lg
-                      p-2 max-h-64 overflow-auto
-                      whitespace-pre-wrap break-all
-                    "
-                  >
-                    {JSON.stringify(replayDetail, null, 2)}
-                  </pre>
+                  <>
+                    <div className="mt-1 text-[11px] text-slate-600">
+                      <div className="font-semibold">
+                        Determinism check (hashes)
+                      </div>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <span
+                          className={
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border " +
+                            (replayDetail.matchProposal
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              : "bg-rose-50 text-rose-800 border-rose-200")
+                          }
+                        >
+                          proposalHash{" "}
+                          {replayDetail.matchProposal ? "MATCH" : "CHANGED"}
+                        </span>
+                        <span
+                          className={
+                            "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] border " +
+                            (replayDetail.matchPrompt
+                              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                              : "bg-rose-50 text-rose-800 border-rose-200")
+                          }
+                        >
+                          promptHash{" "}
+                          {replayDetail.matchPrompt ? "MATCH" : "CHANGED"}
+                        </span>
+                      </div>
+                    </div>
+
+                    <pre
+                      className="
+                        mt-2 text-[11px]
+                        bg-slate-50 border border-slate-200 rounded-lg
+                        p-2 max-h-64 overflow-auto
+                        whitespace-pre-wrap break-all
+                      "
+                    >
+                      {JSON.stringify(replayDetail, null, 2)}
+                    </pre>
+                  </>
                 )}
               </div>
             )}
