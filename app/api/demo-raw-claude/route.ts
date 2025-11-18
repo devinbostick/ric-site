@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // app/api/demo-raw-claude/route.ts
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
