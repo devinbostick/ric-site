@@ -67,15 +67,14 @@ export default function Page() {
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
                 <p className="font-medium mb-1">Deterministic runs</p>
                 <p className="leading-snug">
-                  Same input → same output, bit-for-bit, across machines. No
-                  hidden randomness in the core.
+                  Same input → same output, bit-for-bit, across machines.
                 </p>
               </div>
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
                 <p className="font-medium mb-1">Replayable legality</p>
                 <p className="leading-snug">
-                  Every decision can be replayed and inspected later with a
-                  structured proof bundle.
+                  Every decision is logged with a structured bundle you can
+                  replay later.
                 </p>
               </div>
               <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-3">
@@ -115,10 +114,9 @@ export default function Page() {
                 Put a deterministic gate in front of your model.
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                The legality demo shows RIC acting as a safety and audit layer
-                in front of a stochastic text model. The model can propose
-                anything; RIC applies hard rules and either lets a candidate
-                pass or halts it, with a replayable trace.
+                RIC acts as a deterministic audit layer in front of a stochastic
+                model. The model proposes; RIC applies hard rules and either
+                passes the candidate or halts it, with a replayable trace.
               </p>
               <div className="flex flex-wrap gap-3 text-xs">
                 <Link
@@ -146,8 +144,8 @@ export default function Page() {
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
                 RIC-STEM exposes a linear ODE integrator and a linear system
-                solver. All math runs in fixed-point Q32 on the RIC substrate,
-                and every run increments counters exposed at{" "}
+                solver. All math runs in fixed-point Q32 on the substrate, with
+                counters exposed at{" "}
                 <code className="rounded bg-neutral-100 px-1 py-[1px] text-[11px]">
                   GET /metrics
                 </code>
@@ -172,16 +170,16 @@ export default function Page() {
 
           {/* API access + paper */}
           <div className="mt-10 grid w-full gap-6 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            {/* API access form */}
+            {/* API access */}
             <section className="space-y-3 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-neutral-500">
                 API access
               </p>
               <h2 className="text-base font-semibold">Interested in using RIC?</h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                We are piloting RIC as a deterministic substrate for legal-tech,
-                claims processing, and STEM workflows. Share your email and a
-                sentence on your use case and we will follow up.
+                RIC is being piloted as a deterministic substrate for legal-tech,
+                claims workflows, and STEM applications. Share your email and we
+                will follow up.
               </p>
 
               <form
@@ -190,6 +188,7 @@ export default function Page() {
                 className="mt-2 space-y-3"
               >
                 <input type="text" name="_gotcha" className="hidden" />
+
                 <div className="space-y-1">
                   <label
                     htmlFor="email"
@@ -206,6 +205,7 @@ export default function Page() {
                     className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
                   />
                 </div>
+
                 <div className="space-y-1">
                   <label
                     htmlFor="usecase"
@@ -217,15 +217,12 @@ export default function Page() {
                     id="usecase"
                     name="message"
                     rows={3}
-                    placeholder="e.g., deterministic filter for legal model, or STEM engine for ODE workflows."
+                    placeholder="e.g., deterministic filter for legal model, or ODE workflows."
                     className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
                   />
                 </div>
-                <input
-                  type="hidden"
-                  name="_subject"
-                  value="New RIC API interest"
-                />
+
+                <input type="hidden" name="_subject" value="New RIC API interest" />
                 <input type="hidden" name="_next" value="/thanks" />
 
                 <button
@@ -236,8 +233,7 @@ export default function Page() {
                 </button>
 
                 <p className="text-[11px] text-neutral-500">
-                  No bulk mail. We will only reach out about RIC pilots and
-                  access.
+                  No bulk mail. Only RIC pilot follow-ups.
                 </p>
               </form>
             </section>
@@ -252,9 +248,8 @@ export default function Page() {
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
                 The CODES framework defines the coherence law underneath RIC.
-                The main paper covers the math, the empirical systems, and how
-                the substrate generalizes across physics, biology, and
-                computation.
+                The main paper covers the math, empirical systems, and substrate
+                generalization across physics, biology, and computation.
               </p>
               <a
                 href="https://zenodo.org/records/17545317"
@@ -265,17 +260,14 @@ export default function Page() {
                 Open “CODES: The Coherence Framework Replacing Probability…” →
               </a>
               <p className="text-[11px] text-neutral-500">
-                RIC is the computing substrate built from this framework; the
-                broader theory is still being tested and extended.
+                RIC is the substrate derived from this framework.
               </p>
             </section>
           </div>
 
           {/* Footer */}
           <footer className="mt-10 flex w-full flex-col items-center justify-between gap-2 border-t border-neutral-200 pt-4 text-[11px] text-neutral-500 md:flex-row">
-            <span>
-              © {new Date().getFullYear()} Resonance Intelligence Core
-            </span>
+            <span>© {new Date().getFullYear()} Resonance Intelligence Core</span>
             <div className="flex gap-3">
               <Link
                 href="/stem"
