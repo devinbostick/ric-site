@@ -4,12 +4,6 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
 
 type DemoResponse = {
   decision: "PASS" | "HALT";
@@ -208,8 +202,10 @@ export default function DemoPage() {
     }
   };
 
+  const formattedClaimJson = claimText;
+
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 overflow-x-hidden">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
       <header className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
         <div>
           <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
@@ -272,23 +268,16 @@ export default function DemoPage() {
           </div>
 
           {/* CLAIM JSON */}
-          <Card className="h-full">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-semibold tracking-tight">
-                CLAIM JSON
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="pb-4">
-              <div className="h-[230px] rounded-xl border bg-slate-50 px-3 py-2">
-                <textarea
-                  className="h-full w-full resize-none bg-transparent font-mono text-[11px] leading-snug text-slate-900 outline-none"
-                  value={claimText}
-                  onChange={(e) => setClaimText(e.target.value)}
-                  spellCheck={false}
-                />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-700">
+              Claim JSON
+            </h2>
+            <div className="h-[230px] overflow-auto rounded-xl border bg-slate-50 px-3 py-2">
+              <pre className="whitespace-pre text-[11px] leading-snug text-slate-900">
+                {formattedClaimJson}
+              </pre>
+            </div>
+          </div>
 
           {/* Question + Buttons */}
           <div className="flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -296,7 +285,8 @@ export default function DemoPage() {
               Question
             </h2>
             <input
-              className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-500 outline-none focus:ring-1 focus:ring-slate-400"
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:ring-1 focus:ring-slate-400"
+              value={question}
               onChange={(e) => setQuestion(e.target.value)}
             />
 
