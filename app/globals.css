@@ -2,8 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force light-mode so iOS doesn't auto-darken inputs */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 html,
