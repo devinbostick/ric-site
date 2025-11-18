@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-require-imports */
-
 module.exports = {
   root: true,
   extends: ["next", "turbo", "prettier"],

@@ -3,6 +3,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 type DemoResponse = {
   decision: "PASS" | "HALT";
@@ -394,6 +395,22 @@ export default function DemoPage() {
                       </div>
                       <div className="break-all">{response.ricBundle.id}</div>
                     </div>
+
+                    {response.ricBundle.id && (
+                      <div>
+                        <div className="text-slate-500 uppercase tracking-wide text-[10px]">
+                          Bundle URL
+                        </div>
+                        <div className="break-all">
+                          <Link
+                            href={`/bundle/${encodeURIComponent(response.ricBundle.id)}`}
+                            className="underline underline-offset-2"
+                          >
+                            /bundle/{response.ricBundle.id}
+                          </Link>
+                        </div>
+                      </div>
+                    )}
 
                     {response.ricBundle.graphHash && (
                       <div>
