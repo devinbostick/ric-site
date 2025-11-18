@@ -1,0 +1,51 @@
+{
+  "ricApi": {
+    "run": {
+      "method": "POST",
+      "path": "/run",
+      "request": {
+        "program": "string",
+        "inputs": "object"
+      },
+      "response": {
+        "decision": "PASS | HALT",
+        "reason": "string",
+        "bundleId": "string",
+        "version": "string"
+      }
+    },
+    "bundle": {
+      "method": "GET",
+      "path": "/bundle/:id",
+      "response": {
+        "version": "string",
+        "codeHash": "string",
+        "trace": {
+          "id": "string",
+          "steps": "array"
+        },
+        "graph": {
+          "version": "string",
+          "nodes": "array",
+          "edges": "array"
+        },
+        "graphHash": "string",
+        "bundleHash": "string"
+      }
+    },
+    "metrics": {
+      "method": "GET",
+      "path": "/metrics",
+      "response": "object"
+    },
+    "stemRun": {
+      "method": "POST",
+      "path": "/stem/run",
+      "response": {
+        "system": "string",
+        "steps": "array",
+        "result": "object"
+      }
+    }
+  }
+}
