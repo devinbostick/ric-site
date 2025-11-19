@@ -37,15 +37,17 @@ export default function StemPage() {
         },
       },
       null,
-      2
-    )
+      2,
+    ),
   );
   const [odeResult, setOdeResult] = useState<OdeResult | null>(null);
   const [odeError, setOdeError] = useState<string | null>(null);
   const [odeLoading, setOdeLoading] = useState(false);
 
   // ODE replay state
-  const [odeReplayResult, setOdeReplayResult] = useState<OdeResult | null>(null);
+  const [odeReplayResult, setOdeReplayResult] = useState<OdeResult | null>(
+    null,
+  );
   const [odeReplayError, setOdeReplayError] = useState<string | null>(null);
   const [odeReplayLoading, setOdeReplayLoading] = useState(false);
   const [odeReplaySame, setOdeReplaySame] = useState<boolean | null>(null);
@@ -83,18 +85,18 @@ export default function StemPage() {
         body: JSON.stringify(parsed),
       });
 
-      const json = (await res.json()) as any;
-
-      if (res.status === 404) {
+      // If STEM backend is not live yet, show a clear message
+      if (!res.ok) {
         setOdeError(
-          "RIC substrate is live, but the STEM endpoint /stem/run is not deployed yet. " +
-          "Engine is being brought online next."
+          `RIC substrate reached, but STEM ODE endpoint is not ready yet (status ${res.status}).`,
         );
         setOdeLoading(false);
         return;
       }
 
-      if (!res.ok || !json.ok) {
+      const json = (await res.json()) as any;
+
+      if (!json.ok) {
         setOdeError(json?.error?.message || "STEM ODE run failed.");
         setOdeLoading(false);
         return;
@@ -140,19 +142,19 @@ export default function StemPage() {
         body: JSON.stringify(parsed),
       });
 
-      const json = (await res.json()) as any;
-
-      if (res.status === 404) {
-        setAlgError(
-          "RIC substrate is live, but the STEM algebra endpoint /algebra/run is not deployed yet."
+      if (!res.ok) {
+        setOdeReplayError(
+          `RIC substrate reached, but STEM ODE endpoint is not ready yet (status ${res.status}).`,
         );
-        setAlgLoading(false);
+        setOdeReplayLoading(false);
         return;
       }
 
-      if (!res.ok || !json.ok) {
-        setAlgError(json?.error?.message || "Algebra solve failed.");
-        setAlgLoading(false);
+      const json = (await res.json()) as any;
+
+      if (!json.ok) {
+        setOdeReplayError(json?.error?.message || "STEM ODE replay failed.");
+        setOdeReplayLoading(false);
         return;
       }
 
@@ -207,9 +209,17 @@ export default function StemPage() {
         body: JSON.stringify(body),
       });
 
+      if (!res.ok) {
+        setAlgError(
+          `RIC substrate reached, but STEM algebra endpoint is not ready yet (status ${res.status}).`,
+        );
+        setAlgLoading(false);
+        return;
+      }
+
       const json = (await res.json()) as any;
 
-      if (!res.ok || !json.ok) {
+      if (!json.ok) {
         setAlgError(json?.error?.message || "Algebra solve failed.");
         setAlgLoading(false);
         return;
