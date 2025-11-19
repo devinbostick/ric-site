@@ -1,0 +1,50 @@
+<!-- public/og.svg -->
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Resonance Intelligence Core — Deterministic inference, replayable legality.</title>
+  <desc id="desc">Dark card with RIC logo on the left and title/strapline on the right.</desc>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#020617"/>
+
+  <!-- Left circle logo -->
+  <circle cx="260" cy="315" r="180" fill="#020617" stroke="#E5E7EB" stroke-width="4"/>
+  <text
+    x="260"
+    y="335"
+    text-anchor="middle"
+    font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+    font-size="140"
+    font-weight="700"
+    fill="#FFFFFF">
+    RIC
+  </text>
+
+  <!-- Right-side text -->
+  <text
+    x="520"
+    y="260"
+    font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+    font-size="48"
+    font-weight="700"
+    fill="#F9FAFB">
+    Resonance Intelligence Core
+  </text>
+
+  <text
+    x="520"
+    y="320"
+    font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+    font-size="28"
+    fill="#CBD5F5">
+    Deterministic inference, replayable legality.
+  </text>
+
+  <text
+    x="520"
+    y="380"
+    font-family="-apple-system, BlinkMacSystemFont, system-ui, sans-serif"
+    font-size="22"
+    fill="#9CA3AF">
+    Q32 fixed-point · no floats/time/random · signed proof bundles
+  </text>
+</svg>

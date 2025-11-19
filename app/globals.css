@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  /* force light-style form controls so iOS doesn't make inputs black */
+  /* force light-style form controls so iOS doesn't invert colors */
   color-scheme: light;
 }
 
@@ -13,13 +13,13 @@ body {
   overflow-x: hidden;
 }
 
-/* center images in markdown */
+/* center markdown images */
 .prose img {
   margin: 1.25rem auto;
   display: block;
 }
 
-/* ensure inputs/textareas stay light on mobile */
+/* ensure inputs/textareas stay light on iOS */
 input,
 textarea {
   background-color: #ffffff;
