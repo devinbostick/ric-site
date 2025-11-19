@@ -176,7 +176,7 @@ export default function StemPage() {
     }
   }
 
-  // -------- Algebra handler --------
+    // -------- Algebra handler --------
   async function runAlgebra(e: FormEvent) {
     e.preventDefault();
     setAlgError(null);
@@ -197,6 +197,7 @@ export default function StemPage() {
       }
 
       const body = {
+        kind: "algebra_linear" as const,   // ✅ required by RIC
         system: {
           A,
           b,
@@ -209,18 +210,13 @@ export default function StemPage() {
         body: JSON.stringify(body),
       });
 
-      if (!res.ok) {
-        setAlgError(
-          `RIC substrate reached, but STEM algebra endpoint is not ready yet (status ${res.status}).`,
-        );
-        setAlgLoading(false);
-        return;
-      }
-
       const json = (await res.json()) as any;
 
-      if (!json.ok) {
-        setAlgError(json?.error?.message || "Algebra solve failed.");
+      if (!res.ok || !json.ok) {
+        const msg =
+          json?.error?.message ??
+          `STEM algebra error (status ${res.status}).`;
+        setAlgError(msg);
         setAlgLoading(false);
         return;
       }

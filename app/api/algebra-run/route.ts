@@ -1,5 +1,4 @@
 // app/api/algebra-run/route.ts
-
 import { NextRequest, NextResponse } from "next/server";
 
 const RIC_API_BASE =
@@ -9,6 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
+    // ✅ call RIC directly, NOT /api/algebra-run again
     const ricRes = await fetch(`${RIC_API_BASE}/algebra/run`, {
       method: "POST",
       headers: {
@@ -18,20 +18,17 @@ export async function POST(req: NextRequest) {
     });
 
     const data = await ricRes.json();
-
-    return NextResponse.json(data, {
-      status: ricRes.status,
-    });
+    return NextResponse.json(data, { status: ricRes.status });
   } catch (err) {
     console.error("[algebra-run] error", err);
     return NextResponse.json(
       {
         error: {
           code: "ALGEBRA_RUN_ERROR",
-          message: "Failed to reach RIC backend",
+          message: "Failed to reach RIC algebra backend",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
