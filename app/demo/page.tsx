@@ -205,29 +205,42 @@ export default function DemoPage() {
   const formattedClaimJson = claimText;
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
-      <header className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
-            RIC Demo — Deterministic Gating Layer
-          </h1>
-          <p className="text-sm text-slate-500">
-            RIC decides if the model is allowed to answer. Deterministic hashes,
-            temporal law, and repeatable decisions.
-          </p>
-          <p className="mt-1 text-xs text-slate-500">
-            Legality overview:{" "}
-            <a
-              href="https://resonanceintelligencecore.com/legality-demo"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-2"
-            >
-              resonanceintelligencecore.com/legality-demo
-            </a>
-          </p>
-        </div>
+  <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900">
+    <header className="flex flex-col gap-2 border-b border-slate-200 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
+      <div>
+        <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
+          RIC Demo — Deterministic Gating Layer
+        </h1>
 
+        <p className="text-sm text-slate-500">
+          RIC decides if the model is allowed to answer. Deterministic hashes,
+          temporal law, and repeatable decisions.
+        </p>
+
+        <p className="mt-1 text-xs text-slate-500">
+          Legality overview:{" "}
+          <a
+            href="https://resonanceintelligencecore.com/legality-demo"
+            target="_blank"
+            rel="noreferrer"
+            className="underline underline-offset-2"
+          >
+            resonanceintelligencecore.com/legality-demo
+          </a>
+        </p>
+
+        {/* --- Added STEM pointer --- */}
+        <p className="mt-1 text-xs text-slate-500">
+          Deterministic math engine:{" "}
+          <a
+            href="/stem"
+            className="underline underline-offset-2 text-slate-700"
+          >
+            RIC-STEM v1 →
+          </a>
+        </p>
+      </div>
+  
         <div className="text-xs text-slate-500 lg:text-right">
           Deterministic substrate · Q32 fixed-point, no floats/time/random.
           <div className="mt-1">

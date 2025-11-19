@@ -25,14 +25,15 @@ export default function StemPage() {
       {
         kind: "ode_linear",
         system: {
-          A: [[0]],
+          // dy/dt = -y
+          A: [[-1]],
           b: [0],
         },
         config: {
           t0: 0,
           t1: 1,
-          dt: 0.1,
-          y0: [0],
+          dt: 0.25,
+          y0: [1],
         },
       },
       null,
@@ -71,7 +72,7 @@ export default function StemPage() {
       try {
         parsed = JSON.parse(odePayload);
       } catch {
-        setOdeError("Payload is not valid JSON");
+        setOdeError("Payload is not valid JSON.");
         setOdeLoading(false);
         return;
       }
@@ -85,7 +86,7 @@ export default function StemPage() {
       const json = (await res.json()) as any;
 
       if (!res.ok || !json.ok) {
-        setOdeError(json?.error?.message || "STEM ODE run failed");
+        setOdeError(json?.error?.message || "STEM ODE run failed.");
         setOdeLoading(false);
         return;
       }
@@ -96,7 +97,7 @@ export default function StemPage() {
         y: json.y ?? [],
       });
     } catch (err: any) {
-      setOdeError(err?.message || "Unexpected error");
+      setOdeError(err?.message || "Unexpected error.");
     } finally {
       setOdeLoading(false);
     }
@@ -119,7 +120,7 @@ export default function StemPage() {
       try {
         parsed = JSON.parse(odePayload);
       } catch {
-        setOdeReplayError("Payload is not valid JSON");
+        setOdeReplayError("Payload is not valid JSON.");
         setOdeReplayLoading(false);
         return;
       }
@@ -133,7 +134,7 @@ export default function StemPage() {
       const json = (await res.json()) as any;
 
       if (!res.ok || !json.ok) {
-        setOdeReplayError(json?.error?.message || "STEM ODE replay failed");
+        setOdeReplayError(json?.error?.message || "STEM ODE replay failed.");
         setOdeReplayLoading(false);
         return;
       }
@@ -150,7 +151,7 @@ export default function StemPage() {
       setOdeReplayResult(replay);
       setOdeReplaySame(sameT && sameY);
     } catch (err: any) {
-      setOdeReplayError(err?.message || "Unexpected replay error");
+      setOdeReplayError(err?.message || "Unexpected replay error.");
     } finally {
       setOdeReplayLoading(false);
     }
@@ -171,7 +172,7 @@ export default function StemPage() {
         A = JSON.parse(AInput);
         b = JSON.parse(bInput);
       } catch {
-        setAlgError("A or b is not valid JSON");
+        setAlgError("A or b is not valid JSON.");
         setAlgLoading(false);
         return;
       }
@@ -192,7 +193,7 @@ export default function StemPage() {
       const json = (await res.json()) as any;
 
       if (!res.ok || !json.ok) {
-        setAlgError(json?.error?.message || "Algebra solve failed");
+        setAlgError(json?.error?.message || "Algebra solve failed.");
         setAlgLoading(false);
         return;
       }
@@ -203,7 +204,7 @@ export default function StemPage() {
         y: json.y ?? [],
       });
     } catch (err: any) {
-      setAlgError(err?.message || "Unexpected error");
+      setAlgError(err?.message || "Unexpected error.");
     } finally {
       setAlgLoading(false);
     }
@@ -214,58 +215,70 @@ export default function StemPage() {
       <div className="w-full max-w-5xl space-y-10">
         <header className="space-y-3">
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            RIC-STEM v1
+            RIC-STEM v1 — Deterministic STEM engine
           </h1>
+
           <p className="text-base md:text-lg text-neutral-700 leading-relaxed">
-            Deterministic STEM engine over the RIC substrate. Fixed-point Q32
-            numerics, replayable runs, and legality-locked reasoning.
+            This page talks directly to the RIC substrate. Every run below is a
+            deterministic math program: fixed-point Q32 arithmetic, no floats in
+            core, no randomness, and full replay.
           </p>
 
-          <p className="text-xs md:text-sm text-neutral-500">
-            Every ODE and algebra run increments the STEM counters exposed at{" "}
-            <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
-              GET /metrics
-            </code>{" "}
-            on the RIC substrate.
-          </p>
-
-          <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800">
-            <div className="font-medium mb-0.5">What you are seeing</div>
+          <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800 space-y-1.5">
+            <div className="font-medium">What this proves</div>
             <ul className="list-disc list-inside space-y-0.5">
-              <li>All math runs in fixed-point Q32 on a replayable substrate.</li>
-              <li>Every run is deterministic (no randomness, no floats in core).</li>
-              <li>Same request → same bitwise answer across machines.</li>
+              <li>
+                All differential equations and linear systems run on the same
+                substrate that powers the legality demo.
+              </li>
+              <li>
+                Same JSON request → same bitwise answer across machines and
+                time.
+              </li>
+              <li>
+                The substrate exposes global counters at{" "}
+                <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
+                  GET /metrics
+                </code>{" "}
+                so you can see STEM usage rise in real time.
+              </li>
             </ul>
           </div>
-        </header>
 
-        <p className="text-xs md:text-sm pt-1">
-          Learn more in the{" "}
-          <a
-            href="/ric-stem"
-            className="underline underline-offset-2 text-neutral-800"
-          >
-            RIC-STEM v1 overview →
-          </a>
-        </p>
+          <p className="text-xs md:text-sm text-neutral-600">
+            For a high-level walk-through, see the{" "}
+            <a
+              href="/ric-stem"
+              className="underline underline-offset-2 text-neutral-800"
+            >
+              RIC-STEM v1 overview →
+            </a>
+          </p>
+        </header>
 
         {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
           <h2 className="text-xl font-semibold">1. ODE — Linear system</h2>
           <p className="text-sm text-neutral-700">
-            Sends a linear ODE specification to RIC at{" "}
+            This sends an ODE specification to the substrate at{" "}
             <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
-              /stem/run
+              POST /stem/run
             </code>{" "}
-            via <code className="text-xs">/api/stem-run</code>. All integration
-            runs in fixed-point Q32 on the backend.
+            via the Next.js edge endpoint{" "}
+            <code className="text-xs">/api/stem-run</code>. All integration runs
+            in fixed-point Q32 on the backend.
+          </p>
+
+          <p className="text-xs text-neutral-600">
+            Default example: dy/dt = -y with y(0) = 1, integrated from t = 0 to
+            t = 1 with step dt = 0.25.
           </p>
 
           <form onSubmit={runOde} className="space-y-3">
             <label className="block text-sm font-medium">
               Request payload (JSON)
               <span className="ml-1 text-[11px] text-neutral-500">
-                e.g. 1D system dy/dt = 0 with y(0) = 0
+                Edit and resend to see how the substrate behaves.
               </span>
             </label>
             <textarea
@@ -280,7 +293,7 @@ export default function StemPage() {
                 disabled={odeLoading}
                 className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
               >
-                {odeLoading ? "Running…" : "Run ODE"}
+                {odeLoading ? "Running…" : "Run ODE on RIC"}
               </button>
 
               <button
@@ -289,7 +302,7 @@ export default function StemPage() {
                 disabled={odeReplayLoading || !odeResult}
                 className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-white text-black disabled:opacity-60"
               >
-                {odeReplayLoading ? "Replaying…" : "Replay last ODE"}
+                {odeReplayLoading ? "Replaying…" : "Replay with same input"}
               </button>
             </div>
           </form>
@@ -344,8 +357,12 @@ export default function StemPage() {
                     {odeReplaySame === null
                       ? "Not evaluated yet."
                       : odeReplaySame
-                      ? "Deterministic: replay matches original."
-                      : "Mismatch: replay does not match original."}
+                      ? "Deterministic: replay matches original (t, y)."
+                      : "Mismatch: replay does not match original (t, y)."}
+                  </p>
+                  <p className="text-[11px] text-neutral-600 mt-1">
+                    Same input, same substrate, same output. That is the core
+                    RIC guarantee.
                   </p>
                 </div>
               </div>
@@ -357,13 +374,18 @@ export default function StemPage() {
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
           <h2 className="text-xl font-semibold">2. Algebra — Linear solver</h2>
           <p className="text-sm text-neutral-700">
-            Solves <code>Ax = b</code> deterministically at{" "}
+            This solves <code>Ax = b</code> on the same deterministic substrate.
+            The UI calls{" "}
             <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
-              /algebra/run
+              POST /algebra/run
             </code>{" "}
-            via <code className="text-xs">/api/algebra-run</code>. Backend
-            outputs both Q32 integers and float representations. The default
-            example solves a 2×2 system to x ≈ [1.666666, 0.666666].
+            through{" "}
+            <code className="text-xs">/api/algebra-run</code>. The backend
+            returns both raw Q32 integers and float views.
+          </p>
+
+          <p className="text-xs text-neutral-600">
+            Default example: 2×2 system that solves to x ≈ [1.666666, 0.666666].
           </p>
 
           <form onSubmit={runAlgebra} className="space-y-4">
@@ -395,7 +417,7 @@ export default function StemPage() {
               disabled={algLoading}
               className="inline-flex items-center justify-center rounded-lg border px-4 py-1.5 text-sm font-medium bg-black text-white disabled:opacity-60"
             >
-              {algLoading ? "Solving…" : "Solve Ax = b"}
+              {algLoading ? "Solving…" : "Solve Ax = b on RIC"}
             </button>
           </form>
 
