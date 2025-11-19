@@ -85,6 +85,15 @@ export default function StemPage() {
 
       const json = (await res.json()) as any;
 
+      if (res.status === 404) {
+        setOdeError(
+          "RIC substrate is live, but the STEM endpoint /stem/run is not deployed yet. " +
+          "Engine is being brought online next."
+        );
+        setOdeLoading(false);
+        return;
+      }
+
       if (!res.ok || !json.ok) {
         setOdeError(json?.error?.message || "STEM ODE run failed.");
         setOdeLoading(false);
@@ -133,9 +142,17 @@ export default function StemPage() {
 
       const json = (await res.json()) as any;
 
+      if (res.status === 404) {
+        setAlgError(
+          "RIC substrate is live, but the STEM algebra endpoint /algebra/run is not deployed yet."
+        );
+        setAlgLoading(false);
+        return;
+      }
+
       if (!res.ok || !json.ok) {
-        setOdeReplayError(json?.error?.message || "STEM ODE replay failed.");
-        setOdeReplayLoading(false);
+        setAlgError(json?.error?.message || "Algebra solve failed.");
+        setAlgLoading(false);
         return;
       }
 
