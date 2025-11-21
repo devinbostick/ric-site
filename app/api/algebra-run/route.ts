@@ -8,13 +8,20 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // Call RIC directly, NOT the Next.js API again
+    // Accept either { system: {A,b} } or {A,b} and normalize
+    const system = body.system ?? body;
+
+    const payload = {
+      kind: "algebra_linear",
+      system,
+    };
+
     const ricRes = await fetch(`${RIC_API_BASE}/algebra/run`, {
       method: "POST",
       headers: {
         "content-type": "application/json",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
 
     const data = await ricRes.json();
@@ -23,6 +30,7 @@ export async function POST(req: NextRequest) {
     console.error("[algebra-run] error", err);
     return NextResponse.json(
       {
+        ok: false,
         error: {
           code: "ALGEBRA_RUN_ERROR",
           message: "Failed to reach RIC algebra backend",
