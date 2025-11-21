@@ -191,21 +191,21 @@ export default function LegalityDemoPage() {
           </div>
 
           {/* Right summary card */}
-          <aside className="space-y-4">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-100">
-              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
-                At a glance
-              </div>
-              <ul className="mt-2 space-y-1.5 text-[13px]>
-                <li>Deterministic legality gate in front of any text model.</li>
-                <li>Bit-for-bit replayable outcomes and hashes.</li>
-                <li>Same Q32 substrate as the deterministic STEM engine.</li>
-                <li>
-                  Built for infrastructure, safety-critical, scientific, and
-                  compliance-heavy stacks.
-                </li>
-              </ul>
-            </div>
+                  <aside className="space-y-4">
+                      <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-100">
+                          <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
+                              At a glance
+                          </div>
+                          <ul className="mt-2 space-y-1.5 text-[13px] text-neutral-200 list-disc list-inside">
+                              <li>Deterministic legality gate in front of any text model.</li>
+                              <li>Bit-for-bit replayable outcomes and hashes.</li>
+                              <li>Same Q32 substrate as the deterministic STEM engine.</li>
+                              <li>
+                                  Built for infrastructure, safety-critical, scientific, and
+                                  compliance-heavy stacks.
+                              </li>
+                          </ul>
+                      </div>
 
             <div className="rounded-2xl border border-white/5 bg-black/40 p-4 text-xs text-neutral-300">
               <div className="font-semibold text-neutral-100">Next steps</div>
