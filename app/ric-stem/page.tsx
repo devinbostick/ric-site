@@ -1,320 +1,218 @@
-// app/ric-stem/page.tsx
-
+// app/legality-demo/page.tsx
 import Link from "next/link";
 
-export default function RicStemPage() {
+export default function LegalityDemoPage() {
   return (
-    <main className="min-h-screen bg-white text-neutral-900">
-      <div className="mx-auto max-w-3xl px-4 py-16 md:py-20 space-y-8">
+    <main className="min-h-screen bg-[#050816] text-white">
+      <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
         {/* Header */}
         <header className="space-y-3">
-          <p className="text-xs font-medium text-neutral-500 uppercase tracking-[0.18em]">
-            RIC-STEM v1
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
+            RIC legality demo
           </p>
-          <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            RIC-STEM v1 — Deterministic STEM engine
+          <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+            Deterministic legality gate in front of any decision engine.
           </h1>
-          <p className="text-sm md:text-base text-neutral-700 leading-relaxed">
-            RIC-STEM v1 is a small, focused math engine that runs on top of the
-            Resonance Intelligence Core substrate. It exposes two things:
-            a linear ODE integrator and a linear algebra solver. All math runs
-            in fixed-point 32-bit arithmetic, so every run is exactly
-            repeatable.
+          <p className="max-w-2xl text-sm leading-relaxed text-neutral-200 md:text-base">
+            This demo shows RIC running as a legality gate in front of a
+            stochastic text model. The model can propose anything; RIC applies
+            hard rules and either lets an answer emit or halts it, with a
+            replayable proof of what happened.
           </p>
-          <p className="text-xs md:text-sm text-neutral-600">
-            Try it live in the{" "}
+          <p className="max-w-2xl text-[11px] text-neutral-400">
+            The downstream model (Anthropic, OpenAI, or another provider) is
+            swappable. For the same inputs, the legality decision stays fixed
+            and replayable bit-for-bit.
+          </p>
+
+          <div className="flex flex-wrap gap-3 pt-2">
+            <Link
+              href="/demo"
+              className="inline-flex items-center justify-center rounded-full bg-white px-4 py-2 text-xs font-semibold text-black hover:bg-neutral-100"
+            >
+              Open legality demo
+            </Link>
             <Link
               href="/stem"
-              className="underline underline-offset-2 text-neutral-900"
+              className="inline-flex items-center justify-center rounded-full border border-white/40 px-4 py-2 text-xs font-semibold text-white hover:bg-white/5"
             >
-              RIC-STEM demo →
+              Try RIC-STEM engine
             </Link>
-          </p>
+          </div>
         </header>
 
-        <hr className="border-neutral-200" />
+        <div className="mt-10 grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
+          {/* Left narrative column */}
+          <div className="space-y-8">
+            {/* 1. What the user sees */}
+            <section className="space-y-2">
+              <h2 className="text-lg font-semibold">1. What the user sees</h2>
+              <p className="text-sm leading-relaxed text-neutral-200">
+                In the UI you type a prompt: a legal question, a policy request,
+                or any free-text query.
+              </p>
+              <ul className="list-disc list-inside space-y-1.5 text-sm leading-relaxed text-neutral-200">
+                <li>You write a question and hit send.</li>
+                <li>
+                  The underlying text model proposes one or more draft answers
+                  (its normal stochastic behavior).
+                </li>
+                <li>
+                  RIC evaluates those drafts against a set of rules and returns:
+                  <ul className="ml-5 mt-1 list-disc list-inside space-y-1">
+                    <li>a PASS banner with hashes and a run ID, or</li>
+                    <li>a HALT banner with a deterministic explanation.</li>
+                  </ul>
+                </li>
+              </ul>
+            </section>
 
-        {/* 1. What RIC-STEM gives you */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">1. What RIC-STEM gives you</h2>
+            {/* 2. What RIC does */}
+            <section className="space-y-2">
+              <h2 className="text-lg font-semibold">
+                2. What RIC does under the hood
+              </h2>
+              <p className="text-sm leading-relaxed text-neutral-200">
+                The legality demo runs on the same Q32 deterministic substrate
+                as RIC-STEM:
+              </p>
+              <ul className="list-disc list-inside space-y-1.5 text-sm leading-relaxed text-neutral-200">
+                <li>
+                  The app sends the model’s candidate answer to RIC via{" "}
+                  <code className="rounded bg-white/10 px-1 py-0.5 text-[11px]">
+                    POST /run
+                  </code>
+                  .
+                </li>
+                <li>
+                  RIC runs its legality stack: claim structure checks,
+                  contradiction tests, and temporal rules (for example, policy
+                  or case-law cut-off dates).
+                </li>
+                <li>
+                  If the answer passes, RIC emits it together with a
+                  deterministic proof bundle; if not, RIC halts and no model
+                  output is allowed through.
+                </li>
+              </ul>
+              <p className="text-[11px] text-neutral-400">
+                No floats. No timestamps. No randomness. Same request +
+                same model output → same legality decision and bundle, across
+                machines.
+              </p>
+            </section>
 
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p className="font-medium">Deterministic substrate</p>
-            <p>
-              All computations run on a fixed-point core (Q32). There are no
-              floats and no randomness in the math engine. Same input →
-              same output, bit-for-bit, across machines.
-            </p>
+            {/* 3. Why it matters */}
+            <section className="space-y-2">
+              <h2 className="text-lg font-semibold">3. Why this matters</h2>
+              <ul className="list-disc list-inside space-y-1.5 text-sm leading-relaxed text-neutral-200">
+                <li>
+                  <span className="font-semibold">Auditability:</span> every
+                  decision is stored as a bundle with trace steps, legality
+                  reasons, and hashes. You can replay it later and get the same
+                  result.
+                </li>
+                <li>
+                  <span className="font-semibold">Separation of powers:</span>{" "}
+                  stochastic generation stays on the model. Deterministic
+                  legality stays on RIC, with a provable boundary between them.
+                </li>
+                <li>
+                  <span className="font-semibold">Safety &amp; compliance:</span>{" "}
+                  encode rules that must never be violated (coverage windows,
+                  timing, jurisdiction limits, red-line clauses).
+                </li>
+                <li>
+                  <span className="font-semibold">Control:</span> wrap your
+                  existing model in a deterministic gate you own, version, and
+                  test like any other critical service.
+                </li>
+              </ul>
+            </section>
+
+            {/* 4. Integration sketch */}
+            <section className="space-y-2">
+              <h2 className="text-lg font-semibold">4. Integration sketch</h2>
+              <p className="text-sm leading-relaxed text-neutral-200">
+                The same pattern can be wired into your product:
+              </p>
+              <ol className="list-decimal list-inside space-y-1.5 text-sm leading-relaxed text-neutral-200">
+                <li>Your app calls your text model as usual.</li>
+                <li>
+                  Instead of returning that answer directly, your backend wraps
+                  it in a RIC{" "}
+                  <code className="rounded bg-white/10 px-1 py-0.5 text-[11px]">
+                    /run
+                  </code>{" "}
+                  call with your legality rules.
+                </li>
+                <li>
+                  RIC returns either:
+                  <ul className="ml-5 mt-1 list-disc list-inside space-y-1">
+                    <li>a legal answer + proof bundle, or</li>
+                    <li>a halt signal with a deterministic explanation.</li>
+                  </ul>
+                </li>
+              </ol>
+              <p className="text-[11px] text-neutral-400">
+                This demo shows a narrow, text-focused surface of a broader
+                legality stack that can govern other decision channels as well.
+              </p>
+            </section>
           </div>
 
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p className="font-medium">STEM endpoints (v1)</p>
-            <ul className="list-disc list-inside space-y-1">
-              <li>Linear ODE integrator → <code>POST /stem/run</code></li>
-              <li>Linear algebra solver → <code>POST /algebra/run</code></li>
-            </ul>
-          </div>
+          {/* Right summary column */}
+          <aside className="space-y-4">
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-100">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
+                At a glance
+              </div>
+              <ul className="mt-2 space-y-1.5 text-[13px]">
+                <li>Deterministic legality gate in front of a text model.</li>
+                <li>Bit-for-bit replayable outcomes and hashes.</li>
+                <li>Same Q32 substrate as the RIC-STEM engine.</li>
+                <li>One visible example of a broader legality system.</li>
+              </ul>
+            </div>
 
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p className="font-medium">Metrics and counters</p>
-            <p>
-              <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
-                GET /metrics
-              </code>{" "}
-              exposes:
-            </p>
-            <ul className="list-disc list-inside space-y-1">
-              <li><code>metrics.runs</code> — total substrate runs</li>
-              <li><code>metrics.replays</code> — total replays</li>
-              <li><code>metrics.emitted</code> — emitted legal steps</li>
-              <li><code>metrics.stem.odeRuns</code> — ODE calls</li>
-              <li><code>metrics.stem.algebraRuns</code> — algebra calls</li>
-            </ul>
-          </div>
-
-          <p className="text-xs text-neutral-600">
-            You can treat RIC-STEM as “deterministic math as a service” with
-            built-in usage counters and audit hooks.
-          </p>
-        </section>
-
-        <hr className="border-neutral-200" />
-
-        {/* 2. ODE section */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">2. ODE — Linear systems</h2>
-
-          <p className="text-sm text-neutral-700">
-            Endpoint:
-            <br />
-            <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
-              POST /stem/run
-            </code>
-          </p>
-
-          <p className="text-sm text-neutral-700 font-medium">
-            Example — 1D exponential decay
-          </p>
-
-          <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
-{`{
-  "kind": "ode_linear",
-  "system": {
-    "A": [[-1]],
-    "b": [0]
-  },
-  "config": {
-    "t0": 0,
-    "t1": 1,
-    "dt": 0.1,
-    "y0": [1]
-  }
-}`}
-          </pre>
-
-          <p className="text-sm text-neutral-700">Response shape:</p>
-
-          <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
-{`{
-  "ok": true,
-  "t": [0, 0.099999, ..., 1],
-  "y": [[1], [...], ...]
-}`}
-          </pre>
-
-          <ul className="list-disc list-inside text-sm text-neutral-700 space-y-1">
-            <li>
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                t
-              </code>{" "}
-              and{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                y
-              </code>{" "}
-              are floats derived from Q32 values; the integrator itself runs in
-              fixed-point.
-            </li>
-            <li>
-              Each call increments{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                metrics.runs
-              </code>{" "}
-              and{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                metrics.stem.odeRuns
-              </code>
-              .
-            </li>
-            <li>
-              If you replay this exact payload later, you get the same arrays on
-              any machine, any OS.
-            </li>
-          </ul>
-        </section>
-
-        <hr className="border-neutral-200" />
-
-        {/* 3. Algebra section */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">3. Algebra — Linear solver</h2>
-
-          <p className="text-sm text-neutral-700">
-            Endpoint:
-            <br />
-            <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
-              POST /algebra/run
-            </code>
-          </p>
-
-          <p className="text-sm text-neutral-700 font-medium">
-            Example — 2×2 system
-          </p>
-
-          <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
-{`{
-  "system": {
-    "A": [[1, -1], [2, 1]],
-    "b": [1, 4]
-  }
-}`}
-          </pre>
-
-          <p className="text-sm text-neutral-700">Response (example):</p>
-
-          <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
-{`{
-  "ok": true,
-  "y_q32": ["7158278826", "2863311530"],
-  "y": [1.666666, 0.666666]
-}`}
-          </pre>
-
-          <ul className="list-disc list-inside text-sm text-neutral-700 space-y-1">
-            <li>
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                y_q32
-              </code>{" "}
-              holds the raw fixed-point integers.
-            </li>
-            <li>
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                y
-              </code>{" "}
-              is a float convenience view for humans.
-            </li>
-            <li>
-              Each call increments{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                metrics.runs
-              </code>{" "}
-              and{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                metrics.stem.algebraRuns
-              </code>
-              .
-            </li>
-            <li>
-              Given the same payload, you always get the same solution vector,
-              bit-for-bit.
-            </li>
-          </ul>
-        </section>
-
-        <hr className="border-neutral-200" />
-
-        {/* 4. Observability */}
-        <section className="space-y-3">
-          <h2 className="text-lg font-semibold">4. Observability and proofs</h2>
-
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p className="font-medium">Metrics</p>
-            <p>Live substrate counters:</p>
-          </div>
-
-          <pre className="text-xs bg-neutral-50 border border-neutral-200 rounded-lg p-3 overflow-x-auto">
-{`curl -s http://64.227.89.110:8787/metrics | jq .`}
-          </pre>
-
-          <p className="text-sm text-neutral-700">
-            This returns total runs, replays, emitted steps, and STEM-level
-            counters so you can see how the engine is being used.
-          </p>
-
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p className="font-medium">Replay and trace bundles</p>
-            <p>
-              The underlying substrate exposes{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                /run
-              </code>{" "}
-              and{" "}
-              <code className="text-[11px] bg-neutral-100 px-1 rounded">
-                /replay
-              </code>{" "}
-              endpoints that produce cryptographically hashed proof bundles
-              (including a graph of each step and its legality checks).
-            </p>
-            <p className="text-xs text-neutral-600">
-              RIC-STEM sits on top of this. Future versions can attach ODE /
-              algebra runs directly into those bundles for end-to-end math
-              proofs.
-            </p>
-          </div>
-        </section>
-
-        <hr className="border-neutral-200" />
-
-        {/* 5. Deeper theory */}
-        <section className="space-y-2">
-          <h2 className="text-lg font-semibold">5. Deeper theory (optional)</h2>
-          <p className="text-sm text-neutral-700 leading-relaxed">
-            The broader mathematical framework behind RIC-STEM is described in
-            the Structured Resonance Dynamics corpus. A good starting point is:
-          </p>
-          <p className="text-sm text-neutral-800 underline underline-offset-2">
-            <a
-              href="https://zenodo.org/records/17545317"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Structured Resonance Dynamics — Empirical Convergence Map →
-            </a>
-          </p>
-          <p className="text-xs text-neutral-600">
-            RIC-STEM v1 is built as a concrete, deterministic engine today; the
-            SRD work explores how the same coherence law extends across physics,
-            biology, and computation.
-          </p>
-        </section>
-
-        <hr className="border-neutral-200" />
-
-        {/* Links back */}
-        <section className="flex flex-col gap-4 text-xs text-neutral-700">
-          <Link href="/stem" className="underline underline-offset-2">
-            Open the RIC-STEM demo →
-          </Link>
-          <Link href="/demo" className="underline underline-offset-2">
-            See the legality demo →
-          </Link>
-          <Link href="/" className="underline underline-offset-2">
-            Back to home →
-          </Link>
-
-          <div className="pt-6 text-neutral-500">
-            <p className="font-medium">Research background</p>
-            <p className="mt-1">
-              For the underlying deterministic coherence theory behind RIC, see the{" "}
-              <a
-                href="https://zenodo.org/records/17545317"
-                target="_blank"
-                className="underline underline-offset-2 text-neutral-700"
-              >
-                Empirical Convergence Map for CODES (15,000+ downloads) →
-            </a>
-          </p>
+            <div className="rounded-2xl border border-white/10 bg-black/40 p-4 text-xs text-neutral-300">
+              <div className="font-semibold text-neutral-100">Next steps</div>
+              <ul className="mt-2 space-y-1.5">
+                <li>
+                  Open the{" "}
+                  <Link href="/demo" className="underline underline-offset-2">
+                    live legality demo
+                  </Link>{" "}
+                  and trigger PASS / HALT cases.
+                </li>
+                <li>
+                  Explore deterministic math and Q32 numerics in the{" "}
+                  <Link href="/stem" className="underline underline-offset-2">
+                    RIC-STEM engine
+                  </Link>
+                  .
+                </li>
+                <li>
+                  Request API access from the form on the{" "}
+                  <Link href="/" className="underline underline-offset-2">
+                    homepage
+                  </Link>
+                  .
+                </li>
+              </ul>
+            </div>
+          </aside>
         </div>
-       </section>
+
+        {/* Footer */}
+        <footer className="mt-10 border-t border-white/10 pt-4 text-[11px] text-neutral-300">
+          <p>
+            This legality surface is a simple example of a deeper deterministic
+            reasoning system. The same runtime can gate other decisions:
+            configuration changes, workflow transitions, and safety-critical
+            actions.
+          </p>
+        </footer>
       </div>
     </main>
   );

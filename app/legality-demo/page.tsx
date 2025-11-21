@@ -5,23 +5,24 @@ export default function LegalityDemoPage() {
   return (
     <main className="min-h-screen bg-[#050816] text-white">
       <div className="mx-auto max-w-4xl px-4 py-12 md:py-16">
+        {/* Header / hero */}
         <header className="space-y-3">
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-400">
             RIC legality demo
           </p>
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
-            Deterministic legality gate in front of any text model
+            Deterministic legality gate for any text model
           </h1>
           <p className="text-sm md:text-base text-neutral-200 leading-relaxed max-w-2xl">
-            This demo shows RIC running as a legality gate in front of a
-            stochastic text model. The model can propose anything; RIC applies
-            hard rules and either lets an answer emit or halts it, with a
-            replayable proof of what happened.
+            This demo shows RIC acting as a deterministic governor in front of a
+            stochastic text model. The model proposes; RIC applies hard rules and
+            either lets an answer emit or halts it, with a replayable proof of
+            what happened.
           </p>
           <p className="text-[11px] text-neutral-400 max-w-2xl">
-            The downstream text model (Anthropic, OpenAI, or another provider)
-            is swappable. For the same inputs, the legality decision stays fixed
-            and replayable bit-for-bit.
+            The downstream model provider is swappable. For the same inputs and
+            the same candidate answer, RIC&apos;s legality decision stays fixed and
+            replayable bit-for-bit across machines.
           </p>
 
           <div className="flex flex-wrap gap-3 pt-2">
@@ -35,10 +36,31 @@ export default function LegalityDemoPage() {
               href="/stem"
               className="inline-flex items-center justify-center rounded-full border border-white/40 px-4 py-2 text-xs font-semibold text-white hover:bg-white/5"
             >
-              Try RIC-STEM engine
+              Try deterministic STEM
             </Link>
           </div>
         </header>
+
+        {/* Context: how this fits into RIC */}
+        <section className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm text-neutral-100 space-y-2">
+          <h2 className="text-sm font-semibold">
+            One surface of a deterministic reasoning runtime
+          </h2>
+          <p className="text-[13px] text-neutral-200 leading-relaxed">
+            RIC is a deterministic reasoning runtime that sits under models,
+            pipelines, and decision systems. The legality demo is a narrow view:
+            it shows RIC acting as a governor between any proposal source
+            (LLM, rules engine, service) and your application.
+          </p>
+          <ul className="mt-2 space-y-1.5 text-[13px] text-neutral-200 list-disc list-inside">
+            <li>Same input → same steps → same result.</li>
+            <li>Every run produces a cryptographically anchored bundle.</li>
+            <li>
+              Designed to sit under text models, ETLs, infra workflows, and
+              safety-critical stacks.
+            </li>
+          </ul>
+        </section>
 
         <div className="mt-10 grid gap-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           {/* Left: narrative sections */}
@@ -47,8 +69,8 @@ export default function LegalityDemoPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-semibold">1. What the user sees</h2>
               <p className="text-sm text-neutral-200 leading-relaxed">
-                In the UI you type a prompt: a legal question, a policy request,
-                or any free-text query.
+                In the UI you type a prompt: a policy question, a configuration
+                change, a safety instruction, or any free-text query.
               </p>
               <ul className="list-disc list-inside text-sm text-neutral-200 space-y-1.5">
                 <li>You write a question and hit send.</li>
@@ -57,10 +79,10 @@ export default function LegalityDemoPage() {
                   (its normal stochastic behavior).
                 </li>
                 <li>
-                  RIC evaluates those drafts against a set of rules and returns:
+                  RIC evaluates those drafts against your rules and returns:
                   <ul className="ml-5 mt-1 list-disc list-inside space-y-1">
-                    <li>a PASS banner with hashes and a run ID, or</li>
-                    <li>a HALT banner with a deterministic explanation.</li>
+                    <li>a <span className="font-semibold">PASS</span> banner with hashes and a run ID, or</li>
+                    <li>a <span className="font-semibold">HALT</span> banner with a deterministic explanation.</li>
                   </ul>
                 </li>
               </ul>
@@ -72,32 +94,34 @@ export default function LegalityDemoPage() {
                 2. What RIC does under the hood
               </h2>
               <p className="text-sm text-neutral-200 leading-relaxed">
-                The legality demo runs on the same Q32 deterministic substrate
-                as RIC-STEM:
+                The legality demo runs on the same deterministic substrate as
+                the rest of RIC:
               </p>
               <ul className="list-disc list-inside text-sm text-neutral-200 space-y-1.5">
                 <li>
-                  The app sends the model’s candidate answer to RIC via{" "}
+                  The app sends the model&apos;s candidate answer to RIC via{" "}
                   <code className="text-[11px] bg-white/10 px-1 py-0.5 rounded">
                     POST /run
                   </code>
                   .
                 </li>
                 <li>
-                  RIC runs its legality stack: claim structure checks,
-                  contradiction tests, and temporal rules (for example, policy
-                  or case-law cut-off dates).
+                  RIC parses and normalizes the text, then runs contradiction
+                  checks, constraint rules, and temporal / structural guards.
                 </li>
                 <li>
-                  If the answer passes, RIC emits it together with a
-                  deterministic proof bundle; if not, RIC halts and no model
-                  output is allowed through.
+                  If the answer passes, RIC emits it together with a deterministic
+                  proof bundle; if not, RIC halts and no model output is allowed
+                  through.
                 </li>
               </ul>
               <p className="text-[11px] text-neutral-400">
-                No floats. No timestamps. No randomness. Same request +
-                same model output → same legality decision and bundle, across
-                machines.
+                Q32 fixed-point numerics, no clocks, no randomness. Same request
+                + same candidate answer → same legality decision and bundle,
+                across machines and environments.
+              </p>
+              <p className="text-[11px] text-neutral-400">
+                RIC does not replace your model. It governs it.
               </p>
             </section>
 
@@ -112,19 +136,24 @@ export default function LegalityDemoPage() {
                   result.
                 </li>
                 <li>
-                  <span className="font-semibold">Separation of powers:</span>{" "}
-                  Stochastic generation stays on the model. Deterministic
-                  legality stays on RIC, with a provable boundary between them.
+                  <span className="font-semibold">Tamper-evidence:</span> Proof
+                  bundles are cryptographically anchored. Any change to the
+                  reasoning steps changes the hashes.
                 </li>
                 <li>
                   <span className="font-semibold">Safety &amp; compliance:</span>{" "}
                   Encode rules that must never be violated (coverage windows,
-                  timing, jurisdiction limits, red-line clauses).
+                  timing, policy constraints, safety limits).
                 </li>
                 <li>
-                  <span className="font-semibold">Control:</span> Wrap your
-                  existing model in a deterministic gate you own, version, and
-                  test like any other critical service.
+                  <span className="font-semibold">Infrastructure control:</span>{" "}
+                  Guardrail configuration updates or ETL outputs before they
+                  commit to production systems.
+                </li>
+                <li>
+                  <span className="font-semibold">Robotics &amp; embedded:</span>{" "}
+                  Block unsafe control instructions before they reach devices,
+                  while keeping the reasoning trace for certification or QA.
                 </li>
               </ul>
             </section>
@@ -133,17 +162,17 @@ export default function LegalityDemoPage() {
             <section className="space-y-2">
               <h2 className="text-lg font-semibold">4. Integration sketch</h2>
               <p className="text-sm text-neutral-200 leading-relaxed">
-                The same pattern can be wired into your product:
+                The same pattern can be wired into your stack:
               </p>
               <ol className="list-decimal list-inside text-sm text-neutral-200 space-y-1.5">
-                <li>Your app calls your text model as usual.</li>
+                <li>Your app calls your text model or proposal source as usual.</li>
                 <li>
                   Instead of returning that answer directly, your backend wraps
                   it in a RIC{" "}
                   <code className="text-[11px] bg-white/10 px-1 py-0.5 rounded">
                     /run
                   </code>{" "}
-                  call with your legality rules.
+                  call with your legality and safety rules.
                 </li>
                 <li>
                   RIC returns either:
@@ -154,9 +183,9 @@ export default function LegalityDemoPage() {
                 </li>
               </ol>
               <p className="text-[11px] text-neutral-400">
-                This is the same pattern we are using with early legal-tech and
-                claims partners: keep your models, add a deterministic legality
-                layer in front.
+                Small-footprint HTTP integration works with FastAPI, Express,
+                Go, Rust, Terraform / Kubernetes gates, and edge or on-prem
+                environments.
               </p>
             </section>
           </div>
@@ -167,11 +196,14 @@ export default function LegalityDemoPage() {
               <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-neutral-300">
                 At a glance
               </div>
-              <ul className="mt-2 space-y-1.5 text-[13px]">
-                <li>Deterministic legality gate in front of a text model.</li>
+              <ul className="mt-2 space-y-1.5 text-[13px]>
+                <li>Deterministic legality gate in front of any text model.</li>
                 <li>Bit-for-bit replayable outcomes and hashes.</li>
-                <li>Same Q32 substrate as the RIC-STEM engine.</li>
-                <li>Built for legal, claims, and safety-critical stacks.</li>
+                <li>Same Q32 substrate as the deterministic STEM engine.</li>
+                <li>
+                  Built for infrastructure, safety-critical, scientific, and
+                  compliance-heavy stacks.
+                </li>
               </ul>
             </div>
 
@@ -204,21 +236,13 @@ export default function LegalityDemoPage() {
           </aside>
         </div>
 
-        {/* Research background */}
+        {/* System framing footer */}
         <footer className="mt-10 border-t border-white/10 pt-4 text-[11px] text-neutral-300">
-          <p>
-            Research background. For the underlying deterministic coherence
-            theory behind RIC, see{" "}
-            <a
-              href="https://zenodo.org/records/17545317"
-              target="_blank"
-              rel="noreferrer"
-              className="underline underline-offset-2"
-            >
-              CODES: The Coherence Framework Replacing Probability in Physics,
-              Intelligence, and Reality (v40)
-            </a>
-            .
+          <p className="leading-relaxed">
+            This legality demo is one surface of RIC&apos;s deterministic reasoning
+            runtime. The same substrate supports STEM computation, contradiction
+            detection, rule enforcement, and fully replayable decision chains
+            for critical systems.
           </p>
         </footer>
       </div>
