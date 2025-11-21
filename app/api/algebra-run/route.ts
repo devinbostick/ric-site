@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // ✅ call RIC directly, NOT /api/algebra-run again
+    // Call RIC directly, NOT the Next.js API again
     const ricRes = await fetch(`${RIC_API_BASE}/algebra/run`, {
       method: "POST",
       headers: {

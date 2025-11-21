@@ -1,6 +1,8 @@
+// app/api/stem-run/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const RIC_API_BASE = process.env.RIC_API_BASE ?? "http://64.227.89.110:8787";
+const RIC_API_BASE =
+  process.env.RIC_API_BASE ?? "http://64.227.89.110:8787";
 
 export async function POST(req: NextRequest) {
   try {
@@ -8,7 +10,9 @@ export async function POST(req: NextRequest) {
 
     const ricRes = await fetch(`${RIC_API_BASE}/stem/run`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+      },
       body: JSON.stringify(body),
     });
 
@@ -23,7 +27,18 @@ export async function POST(req: NextRequest) {
           message: "Failed to reach RIC STEM backend",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
+    },
+  });
 }

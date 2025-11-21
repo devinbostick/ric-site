@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 // app/stem/page.tsx
-
 "use client";
 
-import { useState, type FormEvent } from "react";
+import React, {
+  useState,
+  useEffect,
+  type FormEvent,
+  useMemo,
+} from "react";
 
 type OdeResult = {
   ok: boolean;
@@ -17,6 +21,21 @@ type AlgebraResult = {
   y_q32: string[];
   y: number[];
 };
+
+type MetricsState = {
+  runs: number;
+  stemOdeRuns: number;
+  stemAlgebraRuns: number;
+};
+
+function safeParseJson<T>(raw: string): { ok: true; value: T } | { ok: false; error: string } {
+  try {
+    const value = JSON.parse(raw) as T;
+    return { ok: true, value };
+  } catch {
+    return { ok: false, error: "Payload is not valid JSON." };
+  }
+}
 
 export default function StemPage() {
   // -------- ODE state --------
@@ -45,9 +64,7 @@ export default function StemPage() {
   const [odeLoading, setOdeLoading] = useState(false);
 
   // ODE replay state
-  const [odeReplayResult, setOdeReplayResult] = useState<OdeResult | null>(
-    null,
-  );
+  const [odeReplayResult, setOdeReplayResult] = useState<OdeResult | null>(null);
   const [odeReplayError, setOdeReplayError] = useState<string | null>(null);
   const [odeReplayLoading, setOdeReplayLoading] = useState(false);
   const [odeReplaySame, setOdeReplaySame] = useState<boolean | null>(null);
@@ -58,6 +75,67 @@ export default function StemPage() {
   const [algResult, setAlgResult] = useState<AlgebraResult | null>(null);
   const [algError, setAlgError] = useState<string | null>(null);
   const [algLoading, setAlgLoading] = useState(false);
+
+  // -------- Metrics state --------
+  const [metrics, setMetrics] = useState<MetricsState | null>(null);
+  const [metricsError, setMetricsError] = useState<string | null>(null);
+  const [metricsUpdatedAt, setMetricsUpdatedAt] = useState<Date | null>(null);
+
+  const metricsLabel = useMemo(() => {
+    if (!metricsUpdatedAt) return "Live metrics from substrate";
+    return `Live metrics from substrate · updated ${metricsUpdatedAt.toLocaleTimeString()}`;
+  }, [metricsUpdatedAt]);
+
+  // -------- Metrics polling --------
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadMetrics() {
+      try {
+        const res = await fetch("/api/metrics-proxy", {
+          method: "GET",
+          cache: "no-store",
+        });
+
+        if (!res.ok) {
+          if (!cancelled) {
+            setMetricsError(`Unable to load live metrics (status ${res.status}).`);
+          }
+          return;
+        }
+
+        const data = (await res.json()) as any;
+        if (cancelled) return;
+
+        // /metrics can return either { metrics: {...} } or { runs, stem, ... }
+        const m = (data?.metrics ?? data) ?? {};
+        const stem = m.stem ?? {};
+
+        const next: MetricsState = {
+          runs: typeof m.runs === "number" ? m.runs : 0,
+          stemOdeRuns: typeof stem.odeRuns === "number" ? stem.odeRuns : 0,
+          stemAlgebraRuns: typeof stem.algebraRuns === "number" ? stem.algebraRuns : 0,
+        };
+
+        setMetrics(next);
+        setMetricsError(null);
+        setMetricsUpdatedAt(new Date());
+      } catch {
+        if (!cancelled) {
+          setMetricsError("Unable to load live metrics.");
+        }
+      }
+    }
+
+    // Initial load + polling
+    loadMetrics();
+    const id = setInterval(loadMetrics, 15000);
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, []);
 
   // -------- ODE handler --------
   async function runOde(e: FormEvent) {
@@ -70,27 +148,20 @@ export default function StemPage() {
     setOdeLoading(true);
 
     try {
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(odePayload);
-      } catch {
-        setOdeError("Payload is not valid JSON.");
-        setOdeLoading(false);
+      const parsed = safeParseJson<unknown>(odePayload);
+      if (!parsed.ok) {
+        setOdeError(parsed.error);
         return;
       }
 
       const res = await fetch("/api/stem-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(parsed),
+        body: JSON.stringify(parsed.value),
       });
 
-      // If STEM backend is not live yet, show a clear message
       if (!res.ok) {
-        setOdeError(
-          `RIC substrate reached, but STEM ODE endpoint is not ready yet (status ${res.status}).`,
-        );
-        setOdeLoading(false);
+        setOdeError(`RIC STEM endpoint returned an error (status ${res.status}).`);
         return;
       }
 
@@ -98,15 +169,13 @@ export default function StemPage() {
 
       if (!json.ok) {
         setOdeError(json?.error?.message || "STEM ODE run failed.");
-        setOdeLoading(false);
         return;
       }
 
-      setOdeResult({
-        ok: true,
-        t: json.t ?? [],
-        y: json.y ?? [],
-      });
+      const t = Array.isArray(json.t) ? (json.t as number[]) : [];
+      const y = Array.isArray(json.y) ? (json.y as number[][]) : [];
+
+      setOdeResult({ ok: true, t, y });
     } catch (err: any) {
       setOdeError(err?.message || "Unexpected error.");
     } finally {
@@ -127,26 +196,22 @@ export default function StemPage() {
     setOdeReplayLoading(true);
 
     try {
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(odePayload);
-      } catch {
-        setOdeReplayError("Payload is not valid JSON.");
-        setOdeReplayLoading(false);
+      const parsed = safeParseJson<unknown>(odePayload);
+      if (!parsed.ok) {
+        setOdeReplayError(parsed.error);
         return;
       }
 
       const res = await fetch("/api/stem-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(parsed),
+        body: JSON.stringify(parsed.value),
       });
 
       if (!res.ok) {
         setOdeReplayError(
           `RIC substrate reached, but STEM ODE endpoint is not ready yet (status ${res.status}).`,
         );
-        setOdeReplayLoading(false);
         return;
       }
 
@@ -154,14 +219,13 @@ export default function StemPage() {
 
       if (!json.ok) {
         setOdeReplayError(json?.error?.message || "STEM ODE replay failed.");
-        setOdeReplayLoading(false);
         return;
       }
 
       const replay: OdeResult = {
         ok: true,
-        t: json.t ?? [],
-        y: json.y ?? [],
+        t: Array.isArray(json.t) ? (json.t as number[]) : [],
+        y: Array.isArray(json.y) ? (json.y as number[][]) : [],
       };
 
       const sameT = JSON.stringify(replay.t) === JSON.stringify(odeResult.t);
@@ -176,7 +240,7 @@ export default function StemPage() {
     }
   }
 
-    // -------- Algebra handler --------
+  // -------- Algebra handler --------
   async function runAlgebra(e: FormEvent) {
     e.preventDefault();
     setAlgError(null);
@@ -184,23 +248,18 @@ export default function StemPage() {
     setAlgLoading(true);
 
     try {
-      let A: number[][];
-      let b: number[];
+      const parsedA = safeParseJson<number[][]>(AInput);
+      const parsedB = safeParseJson<number[]>(bInput);
 
-      try {
-        A = JSON.parse(AInput);
-        b = JSON.parse(bInput);
-      } catch {
-        setAlgError("A or b is not valid JSON.");
-        setAlgLoading(false);
+      if (!parsedA.ok || !parsedB.ok) {
+        setAlgError(parsedA.ok ? parsedB.error : parsedA.error);
         return;
       }
 
       const body = {
-        kind: "algebra_linear" as const,   // ✅ required by RIC
         system: {
-          A,
-          b,
+          A: parsedA.value,
+          b: parsedB.value,
         },
       };
 
@@ -210,22 +269,24 @@ export default function StemPage() {
         body: JSON.stringify(body),
       });
 
-      const json = (await res.json()) as any;
-
-      if (!res.ok || !json.ok) {
-        const msg =
-          json?.error?.message ??
-          `STEM algebra error (status ${res.status}).`;
-        setAlgError(msg);
-        setAlgLoading(false);
+      if (!res.ok) {
+        setAlgError(
+          `RIC substrate reached, but STEM algebra endpoint is not ready yet (status ${res.status}).`,
+        );
         return;
       }
 
-      setAlgResult({
-        ok: true,
-        y_q32: json.y_q32 ?? [],
-        y: json.y ?? [],
-      });
+      const json = (await res.json()) as any;
+
+      if (!json.ok) {
+        setAlgError(json?.error?.message || "Algebra solve failed.");
+        return;
+      }
+
+      const y_q32 = Array.isArray(json.y_q32) ? (json.y_q32 as string[]) : [];
+      const y = Array.isArray(json.y) ? (json.y as number[]) : [];
+
+      setAlgResult({ ok: true, y_q32, y });
     } catch (err: any) {
       setAlgError(err?.message || "Unexpected error.");
     } finally {
@@ -234,9 +295,10 @@ export default function StemPage() {
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center px-4 py-16">
+    <main className="min-h-screen flex flex-col items-center px-4 py-16 bg-neutral-50">
       <div className="w-full max-w-5xl space-y-10">
-        <header className="space-y-3">
+        {/* Header */}
+        <header className="space-y-4">
           <h1 className="text-3xl md:text-4xl font-semibold tracking-tight">
             RIC-STEM v1 — Deterministic STEM engine
           </h1>
@@ -247,20 +309,17 @@ export default function StemPage() {
             core, no randomness, and full replay.
           </p>
 
-          <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-50 text-neutral-800 space-y-1.5">
+          <div className="text-xs md:text-sm border rounded-xl px-3 py-2 bg-neutral-100 text-neutral-900 space-y-1.5">
             <div className="font-medium">What this proves</div>
             <ul className="list-disc list-inside space-y-0.5">
               <li>
                 All differential equations and linear systems run on the same
                 substrate that powers the legality demo.
               </li>
-              <li>
-                Same JSON request → same bitwise answer across machines and
-                time.
-              </li>
+              <li>Same JSON request → same bitwise answer across machines and time.</li>
               <li>
                 The substrate exposes global counters at{" "}
-                <code className="text-[11px] bg-neutral-100 px-1 py-0.5 rounded">
+                <code className="text-[11px] bg-neutral-200 px-1 py-0.5 rounded">
                   GET /metrics
                 </code>{" "}
                 so you can see STEM usage rise in real time.
@@ -279,6 +338,65 @@ export default function StemPage() {
           </p>
         </header>
 
+        {/* Live substrate status */}
+        <section className="border rounded-2xl p-4 md:p-5 bg-slate-950 text-slate-100 shadow-sm space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-xs font-semibold tracking-[0.18em] uppercase text-slate-400">
+                Live substrate status
+              </h2>
+              <p className="mt-1 text-xs text-slate-400 max-w-sm">
+                {metricsLabel}
+              </p>
+            </div>
+            <div className="text-right text-[11px] text-slate-400">
+              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/50 px-2 py-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>RIC v2 online</span>
+              </span>
+            </div>
+          </div>
+
+          {metricsError && (
+            <p className="text-xs text-red-300">{metricsError}</p>
+          )}
+
+          {!metrics && !metricsError && (
+            <p className="text-xs text-slate-400">
+              Loading live metrics from the substrate…
+            </p>
+          )}
+
+          {metrics && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+              <div className="rounded-xl bg-slate-900/60 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wide text-slate-400">
+                  Total runs
+                </div>
+                <div className="mt-1 text-base font-semibold text-slate-50">
+                  {metrics.runs}
+                </div>
+              </div>
+              <div className="rounded-xl bg-slate-900/60 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wide text-slate-400">
+                  STEM ODE runs
+                </div>
+                <div className="mt-1 text-base font-semibold text-slate-50">
+                  {metrics.stemOdeRuns}
+                </div>
+              </div>
+              <div className="rounded-xl bg-slate-900/60 px-3 py-2">
+                <div className="text-[10px] uppercase tracking-wide text-slate-400">
+                  STEM algebra runs
+                </div>
+                <div className="mt-1 text-base font-semibold text-slate-50">
+                  {metrics.stemAlgebraRuns}
+                </div>
+              </div>
+            </div>
+          )}
+        </section>
+
         {/* ODE card */}
         <section className="border rounded-2xl p-5 md:p-6 bg-white shadow-sm space-y-4">
           <h2 className="text-xl font-semibold">1. ODE — Linear system</h2>
@@ -287,7 +405,7 @@ export default function StemPage() {
             <code className="text-xs bg-neutral-100 px-1 py-0.5 rounded">
               POST /stem/run
             </code>{" "}
-            via the Next.js edge endpoint{" "}
+            via the Next.js endpoint{" "}
             <code className="text-xs">/api/stem-run</code>. All integration runs
             in fixed-point Q32 on the backend.
           </p>
