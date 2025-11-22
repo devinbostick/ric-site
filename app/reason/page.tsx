@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 
 type ReasonNode = {
   id: string;
@@ -32,7 +33,6 @@ type ReasonRunResponse = {
 
 export default function ReasonPage() {
   const [text, setText] = useState(
-    // Helix-themed contradiction example so the effect is obvious
     "Helix is stable in production. Helix is not stable in production."
   );
   const [loading, setLoading] = useState(false);
@@ -78,89 +78,134 @@ export default function ReasonPage() {
 
   return (
     <main className="min-h-screen bg-white text-neutral-900">
-      {/* Hero */}
-      <section className="border-b border-neutral-200">
-        <div className="mx-auto max-w-5xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <p className="text-xs font-medium tracking-[0.2em] text-neutral-500 uppercase">
-            Deterministic reasoning trace
-          </p>
-          <h1 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-            Deterministic reasoning trace for any text input
-          </h1>
-          <p className="mt-4 max-w-3xl text-sm leading-relaxed text-neutral-700">
-            This demo shows RIC executing{" "}
-            <span className="font-medium">reasoning itself</span> as a
-            deterministic process. You provide free text; RIC turns it into a
-            fixed sequence of steps (parse → structure → rule → final), hashes
-            each step, and anchors the entire chain into a graphHash.
-          </p>
-          <p className="mt-3 max-w-3xl text-sm leading-relaxed text-neutral-700">
-            Contradictions such as{" "}
-            <span className="font-mono text-xs">
-              “Helix is stable in production. Helix is not stable in
-              production.”
-            </span>{" "}
-            are encoded into the step sequence and legality fields of the proof
-            bundle. The substrate does not guess; it records exactly what the
-            text implies and locks it into a deterministic trace.
-          </p>
+      {/* Top nav */}
+      <header className="border-b border-neutral-200 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 md:py-5">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white">
+              RIC
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Resonance
+              </span>
+              <span className="text-sm font-medium text-neutral-800">
+                Intelligence Core
+              </span>
+            </div>
+          </Link>
+
+          <nav className="hidden items-center gap-4 text-xs md:flex md:text-sm">
+            <Link
+              href="/"
+              className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
+            >
+              Home
+            </Link>
+            <Link
+              href="/demo"
+              className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
+            >
+              Legality demo
+            </Link>
+            <Link
+              href="/stem"
+              className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
+            >
+              RIC-STEM
+            </Link>
+          </nav>
         </div>
-      </section>
+      </header>
 
-      {/* Input + live demo */}
+      {/* Hero + input + trace */}
       <section className="border-b border-neutral-200 bg-neutral-50">
-        <div className="mx-auto flex max-w-5xl flex-col gap-10 px-4 py-10 sm:px-6 lg:flex-row lg:px-8 lg:py-14">
-          {/* Left: input form */}
-          <div className="flex-1">
-            <h2 className="text-sm font-medium text-neutral-900">
-              Try the deterministic reasoning engine
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-600">
-              Type any natural-language text: a claim, an observation, a
-              question, or a multi-sentence paragraph. RIC will return a fixed
-              reasoning trace you can replay exactly. For a visible effect,
-              start with a Helix contradiction and then remove the contradiction
-              to see the graph stay structurally identical while legality
-              changes in the bundle.
-            </p>
+        <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          {/* Hero row */}
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="max-w-xl space-y-3">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Deterministic reasoning trace
+              </p>
+              <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+                Deterministic reasoning for any text input
+              </h1>
+              <p className="text-sm leading-relaxed text-neutral-700">
+                Type natural-language text. RIC turns it into a fixed sequence
+                of steps (parse → structure → rule → final), hashes each step,
+                and anchors the chain into a graphHash. Same input, same steps,
+                same graph on every machine.
+              </p>
+            </div>
 
-            <div className="mt-4 space-y-3">
-              <label
-                htmlFor="reason-input"
-                className="block text-xs font-medium text-neutral-700"
-              >
-                Input text
-              </label>
-              <textarea
-                id="reason-input"
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                rows={4}
-                className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
-              />
-
-              <button
-                type="button"
-                onClick={handleRun}
-                disabled={loading}
-                className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
-              >
-                {loading
-                  ? "Running deterministic reasoning…"
-                  : "Run deterministic reasoning"}
-              </button>
-
-              {error && (
-                <p className="text-xs text-red-600">
-                  {error}
-                </p>
-              )}
+            <div className="rounded-2xl border border-neutral-200 bg-white p-3 text-xs text-neutral-700 shadow-sm md:w-64">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Quick start
+              </p>
+              <p className="mt-2 leading-snug">
+                1. Use the Helix contradiction example.
+                <br />
+                2. Run reasoning and note the graph hash.
+                <br />
+                3. Remove “not” and rerun — the graph stays the same while
+                legality flips.
+              </p>
             </div>
           </div>
 
-          {/* Right: last run summary */}
-          <div className="flex-1">
-            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+          {/* Main split: input / last run */}
+          <div className="flex flex-col gap-8 lg:flex-row">
+            {/* Left: input form */}
+            <div className="flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-sm font-medium text-neutral-900">
+                Try the deterministic reasoning engine
+              </h2>
+              <p className="mt-2 text-xs leading-relaxed text-neutral-600">
+                Paste a claim, observation, or short paragraph. For a visible
+                effect, start with the Helix contradiction shown below.
+              </p>
+
+              <div className="mt-4 space-y-3">
+                <label
+                  htmlFor="reason-input"
+                  className="block text-xs font-medium text-neutral-700"
+                >
+                  Input text
+                </label>
+                <textarea
+                  id="reason-input"
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  rows={4}
+                  className="w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                />
+
+                <button
+                  type="button"
+                  onClick={handleRun}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
+                >
+                  {loading
+                    ? "Running deterministic reasoning…"
+                    : "Run deterministic reasoning"}
+                </button>
+
+                {error && (
+                  <p className="text-xs text-red-600">
+                    {error}
+                  </p>
+                )}
+
+                <p className="text-[11px] text-neutral-500">
+                  Tip: keep the text short and concrete so the steps are easy to
+                  read.
+                </p>
+              </div>
+            </div>
+
+            {/* Right: last run summary */}
+            <div className="flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-xs font-semibold text-neutral-900">
                   Last reasoning run
@@ -174,10 +219,9 @@ export default function ReasonPage() {
 
               {!result && !loading && (
                 <p className="mt-3 text-xs leading-relaxed text-neutral-600">
-                  Run the demo to see the deterministic reasoning trace. For
-                  identical input the id, graphHash, and steps will be
-                  identical on every machine. You can then fetch the proof
-                  bundle from RIC-Core to inspect legality and rule violations.
+                  Run the demo to see a fixed reasoning trace. For identical
+                  input, the run id, graph hash, and step sequence are identical
+                  across machines and time.
                 </p>
               )}
 
@@ -221,12 +265,11 @@ export default function ReasonPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-[11px] text-neutral-600">
-                      Use the RIC-Core API to retrieve the full proof bundle for
-                      this run via{" "}
+                      Full bundle is available from{" "}
                       <span className="font-mono">
                         GET /reason/bundle/{result.id}
-                      </span>{" "}
-                      and inspect legality and contradiction codes directly.
+                      </span>
+                      .
                     </p>
                   </div>
 
@@ -265,145 +308,86 @@ export default function ReasonPage() {
         </div>
       </section>
 
-      {/* Explanatory sections */}
-      <section className="border-b border-neutral-200">
-        <div className="mx-auto max-w-5xl space-y-10 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-          {/* 1. What the user sees */}
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-900">
-              1. What the user sees
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              In this UI you type any natural-language text: a claim, an
-              observation, a question, or a multi-sentence paragraph. You press
-              run, and RIC returns a deterministic reasoning trace with a fixed
-              sequence of phases (parse → structure → rule → final).
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              For identical input, the phases, node order, graph structure, and
-              hashes are identical on every machine. The legality and
-              contradictions show up in the proof bundle, not as a stochastic
-              score.
-            </p>
+      {/* Compact explanation cards */}
+      <section className="border-t border-neutral-200 bg-white">
+        <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12">
+          <div className="grid gap-4 md:grid-cols-3">
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-xs text-neutral-700">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                What you type
+              </p>
+              <p className="mt-2 leading-snug">
+                Free text: claims, observations, short paragraphs. No special
+                syntax. The engine reads what the text actually says.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-xs text-neutral-700">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                What RIC does
+              </p>
+              <p className="mt-2 leading-snug">
+                Builds a fixed sequence of reasoning steps (parse → structure →
+                rule → final), hashes each step, and anchors them into a
+                deterministic graph.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-neutral-200 bg-neutral-50 p-4 text-xs text-neutral-700">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                What you get
+              </p>
+              <p className="mt-2 leading-snug">
+                A proof bundle: steps, legality, hashes, and graphHash. You can
+                store it, replay it, and gate actions on it.
+              </p>
+            </div>
           </div>
 
-          {/* 2. What RIC does under the hood */}
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-900">
-              2. What RIC does under the hood
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              The app sends your text to{" "}
-              <span className="font-mono text-[11px]">POST /reason/run</span>.
-              RIC normalizes the text and enters the deterministic reasoning
-              path. Each phase produces a new step with its own hash and
-              legality flag. The steps form a graph with a deterministic{" "}
-              <span className="font-mono text-[11px]">graphHash</span>.
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              If your text contains patterns like{" "}
-              <span className="font-mono text-[11px]">
-                “Helix is stable…” / “Helix is not stable…”
-              </span>
-              , the legality engine marks a contradiction in the bundle. Q32
-              fixed-point numerics, no randomness, no hidden clocks, no
-              non-deterministic branches.
-            </p>
-          </div>
-
-          {/* 3. Why this matters */}
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-900">
-              3. Why this matters
-            </h2>
-            <ul className="mt-2 space-y-1 text-xs leading-relaxed text-neutral-700">
-              <li>
-                <span className="font-medium text-neutral-900">
-                  Auditability:
-                </span>{" "}
-                every reasoning event can be stored as a proof bundle and
-                replayed exactly.
-              </li>
-              <li>
-                <span className="font-medium text-neutral-900">
-                  Deterministic governance:
-                </span>{" "}
-                you can govern reasoning itself, not just outputs—key for
-                compliance and safety-critical systems.
-              </li>
-              <li>
-                <span className="font-medium text-neutral-900">
-                  Debuggable and safe:
-                </span>{" "}
-                any change to the steps or graph changes the hash, making
-                retroactive edits detectable.
-              </li>
-              <li>
-                <span className="font-medium text-neutral-900">
-                  Shared substrate:
-                </span>{" "}
-                the same engine underlies STEM, legality, ETL verification, and
-                deterministic decision chains.
-              </li>
-            </ul>
-          </div>
-
-          {/* 4. Integration sketch */}
-          <div>
-            <h2 className="text-sm font-semibold text-neutral-900">
-              4. Integration sketch
-            </h2>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              A common pattern:
-            </p>
-            <ol className="mt-2 list-decimal space-y-1 pl-5 text-xs leading-relaxed text-neutral-700">
-              <li>Your app receives text or events.</li>
-              <li>
-                Instead of passing raw text directly to a model or system, your
-                backend calls RIC&apos;s deterministic reasoning engine.
-              </li>
-              <li>
-                RIC returns a reasoning trace with step hashes, legality, and a
-                graphHash (via the bundle API).
-              </li>
-              <li>
-                You can gate downstream actions, store the bundle, and replay
-                runs for audits or debugging.
-              </li>
-            </ol>
-            <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              The same pattern works with FastAPI, Express, Go, Rust,
-              Terraform/Kubernetes gates, and edge or on-prem deployments.
-            </p>
-          </div>
-
-          {/* At a glance / Next steps */}
-          <div className="grid gap-6 border-t border-neutral-200 pt-6 sm:grid-cols-2">
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-700">
-                At a glance
-              </h3>
-              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-neutral-700">
-                <li>Deterministic reasoning engine for any free-text input.</li>
-                <li>Bit-for-bit identical replay of steps and graph hashes.</li>
-                <li>Same Q32 substrate as the deterministic STEM engine.</li>
-                <li>
-                  Built for infrastructure, scientific, compliance, and
-                  safety-critical stacks.
-                </li>
+          <div className="mt-6 grid gap-4 text-xs text-neutral-700 md:grid-cols-2">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Where this fits
+              </p>
+              <ul className="mt-2 space-y-1 leading-snug">
+                <li>• Safety or compliance gates in front of agents.</li>
+                <li>• Infra control planes that must be replayable.</li>
+                <li>• Workflows that need full reasoning provenance.</li>
               </ul>
             </div>
-            <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-700">
-                Next steps
-              </h3>
-              <ul className="mt-2 space-y-1 text-xs leading-relaxed text-neutral-700">
-                <li>Open the live legality demo and trigger PASS / HALT cases.</li>
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+                Next surfaces to try
+              </p>
+              <ul className="mt-2 space-y-1 leading-snug">
                 <li>
-                  Explore deterministic math and Q32 numerics in the RIC-STEM
-                  engine.
+                  •{" "}
+                  <Link
+                    href="/demo"
+                    className="underline underline-offset-2 hover:text-neutral-900"
+                  >
+                    Legality demo
+                  </Link>{" "}
+                  — deterministic PASS / HALT over proposals.
                 </li>
-                <li>Request API access from the form on the homepage.</li>
+                <li>
+                  •{" "}
+                  <Link
+                    href="/stem"
+                    className="underline underline-offset-2 hover:text-neutral-900"
+                  >
+                    RIC-STEM
+                  </Link>{" "}
+                  — deterministic ODE and algebra on the same core.
+                </li>
+                <li>
+                  •{" "}
+                  <Link
+                    href="/"
+                    className="underline underline-offset-2 hover:text-neutral-900"
+                  >
+                    Home
+                  </Link>{" "}
+                  — overview and API access form.
+                </li>
               </ul>
             </div>
           </div>

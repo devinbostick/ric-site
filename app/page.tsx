@@ -23,6 +23,12 @@ export default function Page() {
 
           <nav className="hidden gap-4 text-xs md:flex md:text-sm">
             <Link
+              href="/reason"
+              className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
+            >
+              Reasoning demo
+            </Link>
+            <Link
               href="/demo"
               className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
             >
@@ -69,8 +75,14 @@ export default function Page() {
 
                 <div className="flex flex-wrap gap-3 pt-1">
                   <Link
-                    href="/demo"
+                    href="/reason"
                     className="inline-flex items-center justify-center rounded-xl bg-black px-5 py-2 text-sm font-medium text-white hover:opacity-90"
+                  >
+                    Try deterministic reasoning
+                  </Link>
+                  <Link
+                    href="/demo"
+                    className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
                   >
                     Open legality demo
                   </Link>
@@ -443,6 +455,12 @@ export default function Page() {
               © {new Date().getFullYear()} Resonance Intelligence Core
             </span>
             <div className="flex flex-wrap gap-3">
+              <Link
+                href="/reason"
+                className="underline underline-offset-2 hover:text-neutral-700"
+              >
+                Reasoning demo
+              </Link>
               <Link
                 href="/stem"
                 className="underline underline-offset-2 hover:text-neutral-700"
