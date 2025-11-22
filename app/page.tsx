@@ -104,7 +104,7 @@ export default function Page() {
               </div>
 
               {/* Feature cards – responsive wide pills */}
-              <div className="mt-4 grid w-full flex-1 min-w-[220px] gap-3 text-xs text-neutral-800 md:mt-0 md:max-w-sm md:text-sm">
+               <div className="mt-4 grid w-full flex-1 min-w-[260px] gap-3 text-xs text-neutral-800 md:mt-0 md:text-sm">
                 <div className="flex min-h-[72px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/80 px-4 py-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                     Reproducible computation
