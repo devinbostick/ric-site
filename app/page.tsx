@@ -56,28 +56,36 @@ export default function Page() {
         </header>
 
         {/* Main content */}
-        <section className="flex flex-1 flex-col gap-10">
+        <section className="flex flex-1 flex-col gap-8">
           {/* Hero */}
-          <section className="rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 p-6 shadow-sm md:p-8">
+          <section className="rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 px-5 py-5 shadow-sm md:px-7 md:py-6">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
               <div className="max-w-3xl space-y-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-500">
                   Deterministic reasoning infrastructure
                 </p>
 
-                <h1 className="text-4xl font-semibold tracking-tight md:text-6xl leading-tight">
+                <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
                   Deterministic Reasoning Intelligence
                   <br />
                   for critical systems.
                 </h1>
 
-                <p className="text-sm leading-relaxed text-neutral-700 md:text-base max-w-lg">
+                <p className="max-w-lg text-sm leading-relaxed text-neutral-700 md:text-base">
                   RIC executes reasoning as a reproducible process — same input → same
                   steps → same output — with a full proof bundle for every run. No
                   randomness. No clocks. No drift.
                 </p>
 
-                <div className="flex flex-wrap gap-2 pt-1">
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  {/* New “Demos →” label to the left */}
+                  <Link
+                    href="/reason"
+                    className="inline-flex items-center text-xs font-medium uppercase tracking-[0.18em] text-neutral-600 hover:text-neutral-900 md:text-[11px]"
+                  >
+                    Demos&nbsp;→
+                  </Link>
+
                   <Link
                     href="/reason"
                     className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:opacity-90"
@@ -99,8 +107,9 @@ export default function Page() {
                 </div>
               </div>
 
-              <div className="grid flex-1 gap-3 text-xs text-neutral-800 md:text-sm">
-                <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
+              {/* Feature cards – flatter, wider pills */}
+              <div className="grid flex-1 gap-3 text-xs text-neutral-800 md:max-w-xs md:text-sm">
+                <div className="flex min-h-[80px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                     Reproducible computation
                   </p>
@@ -109,7 +118,7 @@ export default function Page() {
                     machines and environments.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
+                <div className="flex min-h-[80px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                     Deterministic reasoning
                   </p>
@@ -118,7 +127,7 @@ export default function Page() {
                     hashes, legality checks, and graph-anchored proofs.
                   </p>
                 </div>
-                <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
+                <div className="flex min-h-[80px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/70 px-4 py-3">
                   <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                     Infrastructure ready
                   </p>
