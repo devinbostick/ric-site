@@ -32,7 +32,8 @@ type ReasonRunResponse = {
 
 export default function ReasonPage() {
   const [text, setText] = useState(
-    "The sky is blue. Blue light is scattered by the atmosphere."
+    // Helix-themed contradiction example so the effect is obvious
+    "Helix is stable in production. Helix is not stable in production."
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,12 +95,14 @@ export default function ReasonPage() {
             each step, and anchors the entire chain into a graphHash.
           </p>
           <p className="mt-3 max-w-3xl text-sm leading-relaxed text-neutral-700">
-            The downstream model is not involved here. This page exposes the
-            substrate directly:{" "}
+            Contradictions such as{" "}
             <span className="font-mono text-xs">
-              same input → same steps → same graph → same hash
+              “Helix is stable in production. Helix is not stable in
+              production.”
             </span>{" "}
-            across machines and time.
+            are encoded into the step sequence and legality fields of the proof
+            bundle. The substrate does not guess; it records exactly what the
+            text implies and locks it into a deterministic trace.
           </p>
         </div>
       </section>
@@ -115,7 +118,10 @@ export default function ReasonPage() {
             <p className="mt-2 text-xs leading-relaxed text-neutral-600">
               Type any natural-language text: a claim, an observation, a
               question, or a multi-sentence paragraph. RIC will return a fixed
-              reasoning trace you can replay exactly.
+              reasoning trace you can replay exactly. For a visible effect,
+              start with a Helix contradiction and then remove the contradiction
+              to see the graph stay structurally identical while legality
+              changes in the bundle.
             </p>
 
             <div className="mt-4 space-y-3">
@@ -139,7 +145,9 @@ export default function ReasonPage() {
                 disabled={loading}
                 className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
               >
-                {loading ? "Running deterministic reasoning…" : "Run deterministic reasoning"}
+                {loading
+                  ? "Running deterministic reasoning…"
+                  : "Run deterministic reasoning"}
               </button>
 
               {error && (
@@ -158,8 +166,8 @@ export default function ReasonPage() {
                   Last reasoning run
                 </h3>
                 {result && (
-                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
-                    Deterministic • OK
+                  <span className="rounded-full bg-neutral-900/5 px-2 py-0.5 text-[10px] font-medium text-neutral-800">
+                    Deterministic trace
                   </span>
                 )}
               </div>
@@ -167,8 +175,9 @@ export default function ReasonPage() {
               {!result && !loading && (
                 <p className="mt-3 text-xs leading-relaxed text-neutral-600">
                   Run the demo to see the deterministic reasoning trace. For
-                  identical input the id, graphHash, and steps will be identical
-                  on every machine.
+                  identical input the id, graphHash, and steps will be
+                  identical on every machine. You can then fetch the proof
+                  bundle from RIC-Core to inspect legality and rule violations.
                 </p>
               )}
 
@@ -212,8 +221,12 @@ export default function ReasonPage() {
                       </span>
                     </div>
                     <p className="mt-1 text-[11px] text-neutral-600">
-                      Use the API to retrieve the full proof bundle for this
-                      run via <span className="font-mono">GET /reason/bundle/:id</span>.
+                      Use the RIC-Core API to retrieve the full proof bundle for
+                      this run via{" "}
+                      <span className="font-mono">
+                        GET /reason/bundle/{result.id}
+                      </span>{" "}
+                      and inspect legality and contradiction codes directly.
                     </p>
                   </div>
 
@@ -221,7 +234,7 @@ export default function ReasonPage() {
                     <p className="mb-2 text-[11px] font-medium text-neutral-900">
                       Deterministic steps
                     </p>
-                    <div className="space-y-2 max-h-64 overflow-auto pr-1">
+                    <div className="max-h-64 space-y-2 overflow-auto pr-1">
                       {nodesSorted.map((node) => (
                         <div
                           key={node.id}
@@ -254,7 +267,7 @@ export default function ReasonPage() {
 
       {/* Explanatory sections */}
       <section className="border-b border-neutral-200">
-        <div className="mx-auto max-w-5xl px-4 py-10 space-y-10 sm:px-6 lg:px-8 lg:py-14">
+        <div className="mx-auto max-w-5xl space-y-10 px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           {/* 1. What the user sees */}
           <div>
             <h2 className="text-sm font-semibold text-neutral-900">
@@ -268,7 +281,9 @@ export default function ReasonPage() {
             </p>
             <p className="mt-2 text-xs leading-relaxed text-neutral-700">
               For identical input, the phases, node order, graph structure, and
-              hashes are identical on every machine.
+              hashes are identical on every machine. The legality and
+              contradictions show up in the proof bundle, not as a stochastic
+              score.
             </p>
           </div>
 
@@ -286,10 +301,13 @@ export default function ReasonPage() {
               <span className="font-mono text-[11px]">graphHash</span>.
             </p>
             <p className="mt-2 text-xs leading-relaxed text-neutral-700">
-              The same substrate powers legality enforcement, STEM computation,
-              contradiction detection, and infra workflows. Q32 fixed-point
-              numerics, no randomness, no hidden clocks, no non-deterministic
-              branches.
+              If your text contains patterns like{" "}
+              <span className="font-mono text-[11px]">
+                “Helix is stable…” / “Helix is not stable…”
+              </span>
+              , the legality engine marks a contradiction in the bundle. Q32
+              fixed-point numerics, no randomness, no hidden clocks, no
+              non-deterministic branches.
             </p>
           </div>
 
@@ -322,7 +340,7 @@ export default function ReasonPage() {
               </li>
               <li>
                 <span className="font-medium text-neutral-900">
-                  Foundational substrate:
+                  Shared substrate:
                 </span>{" "}
                 the same engine underlies STEM, legality, ETL verification, and
                 deterministic decision chains.
@@ -346,7 +364,7 @@ export default function ReasonPage() {
               </li>
               <li>
                 RIC returns a reasoning trace with step hashes, legality, and a
-                graphHash.
+                graphHash (via the bundle API).
               </li>
               <li>
                 You can gate downstream actions, store the bundle, and replay
