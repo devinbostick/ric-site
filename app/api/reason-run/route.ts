@@ -7,9 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // External RIC v2 API base
-// Falls back to your server if env missing
+// Falls back to local dev if env missing
 const RIC_API_BASE =
-  process.env.RIC_API_BASE ?? "http://64.227.89.110:8787";
+  process.env.RIC_API_BASE ?? "http://127.0.0.1:8787";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     console.error("[reason-run]", err);
     return NextResponse.json(
       { error: "E_REASON_PROXY" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
