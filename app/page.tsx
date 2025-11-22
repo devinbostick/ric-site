@@ -60,37 +60,41 @@ export default function Page() {
           {/* Hero */}
           <section className="rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 p-6 shadow-sm md:p-8">
             <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div className="max-w-xl space-y-4">
+              <div className="max-w-3xl space-y-5">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-500">
                   Deterministic reasoning infrastructure
                 </p>
-                <h1 className="text-3xl font-semibold tracking-tight md:text-5xl">
-                  Deterministic Reasoning Intelligence for critical systems.
+
+                <h1 className="text-4xl font-semibold tracking-tight md:text-6xl leading-tight">
+                  Deterministic Reasoning Intelligence
+                  <br />
+                  for critical systems.
                 </h1>
-                <p className="text-sm leading-relaxed text-neutral-700 md:text-base">
-                  RIC executes reasoning as a reproducible process — same input →
-                  same steps → same output — with a full proof bundle for every
-                  run. No randomness. No clocks. No drift.
+
+                <p className="text-sm leading-relaxed text-neutral-700 md:text-base max-w-lg">
+                  RIC executes reasoning as a reproducible process — same input → same
+                  steps → same output — with a full proof bundle for every run. No
+                  randomness. No clocks. No drift.
                 </p>
 
-                <div className="flex flex-wrap gap-3 pt-1 md:flex-nowrap md:gap-2">
+                <div className="flex flex-wrap gap-2 pt-1">
                   <Link
                     href="/reason"
-                    className="inline-flex items-center justify-center rounded-xl bg-black px-5 py-2 text-sm font-medium text-white hover:opacity-90"
+                    className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:opacity-90"
                   >
-                    Try deterministic reasoning
+                    Reasoning
                   </Link>
                   <Link
                     href="/demo"
-                    className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
+                    className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
                   >
-                    Open legality demo
+                    Legality
                   </Link>
                   <Link
                     href="/stem"
-                    className="inline-flex items-center justify-center rounded-xl border border-neutral-300 bg-white px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
+                    className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
                   >
-                    Try deterministic STEM
+                    STEM
                   </Link>
                 </div>
               </div>
@@ -101,8 +105,8 @@ export default function Page() {
                     Reproducible computation
                   </p>
                   <p className="leading-snug">
-                    Fixed-point Q32 engine with bit-for-bit identical replay
-                    across machines and environments.
+                    Fixed-point Q32 engine with bit-for-bit identical replay across
+                    machines and environments.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
@@ -119,8 +123,8 @@ export default function Page() {
                     Infrastructure ready
                   </p>
                   <p className="leading-snug">
-                    Pure JSON API, CPU-only. Fits Terraform, Kubernetes, CI
-                    pipelines, and edge deployments.
+                    Pure JSON API, CPU-only. Fits Terraform, Kubernetes, CI pipelines,
+                    and edge deployments.
                   </p>
                 </div>
               </div>
@@ -139,8 +143,7 @@ export default function Page() {
                     Deterministic core
                   </p>
                   <p className="leading-snug text-neutral-100">
-                    No randomness, no hidden clocks, no non-deterministic
-                    branches.
+                    No randomness, no hidden clocks, no non-deterministic branches.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -148,8 +151,8 @@ export default function Page() {
                     Tamper-evident
                   </p>
                   <p className="leading-snug text-neutral-100">
-                    Hash-linked steps, graphs, and bundles make retroactive
-                    edits detectable.
+                    Hash-linked steps, graphs, and bundles make retroactive edits
+                    detectable.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
@@ -173,10 +176,10 @@ export default function Page() {
                 For systems where “probably correct” is not enough.
               </h2>
               <p className="text-sm leading-relaxed text-neutral-700">
-                Many workflows rely on opaque probabilistic systems. That fails
-                in environments where outcomes must be explained, replayed, and
-                trusted over long horizons. RIC provides deterministic reasoning
-                as infrastructure: every decision has a traceable origin and a
+                Many workflows rely on opaque probabilistic systems. That fails in
+                environments where outcomes must be explained, replayed, and trusted
+                over long horizons. RIC provides deterministic reasoning as
+                infrastructure: every decision has a traceable origin and a
                 reproducible proof.
               </p>
               <div className="grid gap-3 text-sm text-neutral-700 md:grid-cols-2">
@@ -216,22 +219,21 @@ export default function Page() {
                 <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
                   <p className="font-medium">Cloud &amp; infra control</p>
                   <p className="mt-1 leading-snug">
-                    Deterministic policies for routing, rate-limits, and
-                    failover logic.
+                    Deterministic policies for routing, rate-limits, and failover
+                    logic.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
                   <p className="font-medium">Robotics &amp; automation</p>
                   <p className="mt-1 leading-snug">
-                    Explainable control decisions with full traceability per
-                    action.
+                    Explainable control decisions with full traceability per action.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
                   <p className="font-medium">STEM &amp; simulation</p>
                   <p className="mt-1 leading-snug">
-                    ODEs and linear algebra without floating-point drift or
-                    hidden state.
+                    ODEs and linear algebra without floating-point drift or hidden
+                    state.
                   </p>
                 </div>
                 <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
@@ -252,9 +254,8 @@ export default function Page() {
                   Every run is a proof-bundled reasoning trace.
                 </h2>
                 <p className="text-sm leading-relaxed text-neutral-700">
-                  RIC treats reasoning as a first-class artifact. Each call
-                  returns a deterministic bundle you can store, replay, and
-                  audit.
+                  RIC treats reasoning as a first-class artifact. Each call returns a
+                  deterministic bundle you can store, replay, and audit.
                 </p>
               </div>
               <div className="grid flex-1 gap-2 text-xs text-neutral-800 md:grid-cols-2 md:text-sm">
@@ -287,11 +288,10 @@ export default function Page() {
                 A deterministic gate in front of any decision engine.
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC can sit between your application and any proposal source.
-                The proposal is checked against hard constraints and
-                contradiction rules; RIC either passes or blocks it with a fully
-                replayable justification. The legality demo is a simple surface
-                of a deeper legality stack.
+                RIC can sit between your application and any proposal source. The
+                proposal is checked against hard constraints and contradiction rules;
+                RIC either passes or blocks it with a fully replayable justification.
+                The legality demo is a simple surface of a deeper legality stack.
               </p>
               <div className="flex flex-wrap gap-3 text-xs">
                 <Link
@@ -318,13 +318,13 @@ export default function Page() {
                 STEM on top of the same deterministic core.
               </h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC-STEM exposes linear ODE solving and linear system solving on
-                the same fixed-point Q32 substrate, with metrics available at{" "}
+                RIC-STEM exposes linear ODE solving and linear system solving on the
+                same fixed-point Q32 substrate, with metrics available at{" "}
                 <code className="rounded bg-neutral-100 px-1 py-[1px] text-[11px]">
                   GET /metrics
                 </code>
-                . It is a focused example of the broader runtime, chosen because
-                its results are straightforward to verify and compare.
+                . It is a focused example of the broader runtime, chosen because its
+                results are straightforward to verify and compare.
               </p>
               <div className="flex flex-wrap gap-3 text-xs">
                 <Link
@@ -350,14 +350,12 @@ export default function Page() {
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 API access
               </p>
-              <h2 className="text-base font-semibold">
-                Request access to the RIC API.
-              </h2>
+              <h2 className="text-base font-semibold">Request access to the RIC API.</h2>
               <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC is in limited pilot as deterministic reasoning infrastructure
-                for infrastructure control, safety systems, STEM workflows, and
-                embedded automation. Share your email and a brief description of
-                your environment to discuss integration.
+                RIC is in limited pilot as deterministic reasoning infrastructure for
+                infrastructure control, safety systems, STEM workflows, and embedded
+                automation. Share your email and a brief description of your
+                environment to discuss integration.
               </p>
 
               <form
@@ -430,8 +428,8 @@ export default function Page() {
               </h2>
               <ul className="space-y-2 text-xs leading-relaxed text-neutral-700 md:text-sm">
                 <li>
-                  • JSON in/out over HTTP. Works cleanly with FastAPI, Flask,
-                  Express, Go, Rust, Java, and more.
+                  • JSON in/out over HTTP. Works cleanly with FastAPI, Flask, Express,
+                  Go, Rust, Java, and more.
                 </li>
                 <li>
                   • Compatible with containerized deployments: Docker, Kubernetes,
@@ -451,9 +449,7 @@ export default function Page() {
 
           {/* Footer */}
           <footer className="mt-6 flex w-full flex-col items-center justify-between gap-2 border-t border-neutral-200 pt-4 text-[11px] text-neutral-500 md:mt-8 md:flex-row">
-            <span>
-              © {new Date().getFullYear()} Resonance Intelligence Core
-            </span>
+            <span>© {new Date().getFullYear()} Resonance Intelligence Core</span>
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/reason"
