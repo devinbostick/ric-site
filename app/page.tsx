@@ -93,6 +93,7 @@ export default function Page() {
                     Try deterministic STEM
                   </Link>
                 </div>
+              </div>
 
               <div className="grid flex-1 gap-3 text-xs text-neutral-800 md:text-sm">
                 <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
