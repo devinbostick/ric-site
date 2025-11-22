@@ -73,7 +73,7 @@ export default function Page() {
                   run. No randomness. No clocks. No drift.
                 </p>
 
-                <div className="flex flex-wrap gap-3 pt-1">
+                <div className="flex flex-wrap gap-3 pt-1 md:flex-nowrap md:gap-2">
                   <Link
                     href="/reason"
                     className="inline-flex items-center justify-center rounded-xl bg-black px-5 py-2 text-sm font-medium text-white hover:opacity-90"
@@ -93,7 +93,6 @@ export default function Page() {
                     Try deterministic STEM
                   </Link>
                 </div>
-              </div>
 
               <div className="grid flex-1 gap-3 text-xs text-neutral-800 md:text-sm">
                 <div className="rounded-2xl border border-neutral-200 bg-white/70 p-3">
