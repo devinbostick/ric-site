@@ -1,18 +1,118 @@
-// app/page.tsx
+// app/agi/page.tsx
+"use client";
+
+import React, { useState } from "react";
 import Link from "next/link";
 
-export default function Page() {
+type AgiChoice = {
+  id: string;
+  label: string;
+  description: string;
+  pasScore: number;
+};
+
+type AgiWorld = {
+  tick: number;
+  facts: { key: string; value: any }[];
+  storeHash: string;
+  goals: any[];
+  memory: { steps: any[] };
+  entities: any[];
+  events: any[];
+  roles: any[];
+  timeline: any[];
+  trainingHints?: string[];
+  [k: string]: any;
+};
+
+type AgiRunResponse = {
+  id: string;
+  version: string;
+  bundleHash: string;
+  bundle?: {
+    version: string;
+    codeHash: string;
+    trace: {
+      id: string;
+      steps: any[];
+    };
+    graph: {
+      version: string;
+      nodes: any[];
+      edges: any[];
+      [k: string]: any;
+    };
+    graphHash: string;
+    bundleHash: string;
+    [k: string]: any;
+  };
+  legality?: any | null;
+  chosen?: AgiChoice;
+  candidates?: AgiChoice[];
+  world?: AgiWorld;
+  pasRaw?: number | string;
+  [k: string]: any;
+};
+
+export default function AgiPage() {
+  const [text, setText] = useState("small clean claim with no fraud flags");
+  const [docId, setDocId] = useState("doc-helix");
+  const [runId, setRunId] = useState("run-1");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<AgiRunResponse | null>(null);
+
+  async function handleRun() {
+    const t = text.trim();
+    if (!t) {
+      setError("Input text is required.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setResult(null);
+
+    try {
+      const res = await fetch("/api/agi-run", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          docId,
+          runId,
+          text: t,
+          goals: [],
+        }),
+      });
+
+      if (!res.ok) {
+        const body = await res.text().catch(() => "");
+        throw new Error(`/api/agi-run failed: ${res.status} ${body}`);
+      }
+
+      const data = (await res.json()) as AgiRunResponse;
+      setResult(data);
+    } catch (e: any) {
+      setError(e?.message ?? "Deterministic AGI run failed.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const traceSteps = result?.bundle?.trace?.steps ?? [];
+  const graphEdges = result?.bundle?.graph?.edges ?? [];
+
   return (
     <main className="min-h-screen bg-white text-neutral-900">
-      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-5 md:py-8">
-        {/* Top nav */}
-        <header className="mb-8 flex items-center justify-between">
+      {/* Top nav */}
+      <header className="border-b border-neutral-200 bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 md:py-5">
           <Link href="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-neutral-900 text-[10px] font-semibold text-white">
               RIC
             </div>
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 Resonance
               </span>
               <span className="text-sm font-medium text-neutral-800">
@@ -21,12 +121,12 @@ export default function Page() {
             </div>
           </Link>
 
-          <nav className="hidden gap-4 text-xs md:flex md:text-sm">
+          <nav className="hidden items-center gap-4 text-xs md:flex md:text-sm">
             <Link
-              href="/reason"
+              href="/"
               className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
             >
-              Reasoning demo
+              Home
             </Link>
             <Link
               href="/demo"
@@ -41,443 +141,472 @@ export default function Page() {
               RIC-STEM
             </Link>
             <Link
-              href="/ric-stem"
+              href="/reason"
               className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
             >
-              STEM overview
-            </Link>
-            <Link
-              href="/legality-demo"
-              className="text-neutral-700 underline-offset-4 hover:text-neutral-900 hover:underline"
-            >
-              Legality overview
+              Reasoning
             </Link>
           </nav>
-        </header>
+        </div>
+      </header>
 
-        {/* Main content */}
-        <section className="flex flex-1 flex-col gap-6">
+      {/* AGI surface */}
+      <section className="border-b border-neutral-200 bg-neutral-50">
+        <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           {/* Hero */}
-          <section className="rounded-3xl border border-neutral-200 bg-gradient-to-br from-neutral-50 to-neutral-100 px-5 py-4 shadow-sm md:px-7 md:py-5">
-            <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
-              <div className="max-w-3xl space-y-4">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.26em] text-neutral-500">
-                  Deterministic reasoning infrastructure
-                </p>
+          <div className="mb-8 max-w-3xl space-y-3">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
+              Deterministic action selection
+            </p>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Deterministic AGI loop over proof bundles
+            </h1>
+            <p className="text-sm leading-relaxed text-neutral-700">
+              This surface sends your text into the AGI engine running on
+              RIC-Core. The engine builds a proof bundle, scores candidate
+              actions, and chooses the maximally coherent one. Same input, same
+              world facts, same choice every time.
+            </p>
+            <p className="text-xs leading-relaxed text-neutral-600">
+              For a given <span className="font-mono">docId</span>, the engine
+              can accumulate world facts, goals, and memory across multiple
+              runs. It learns more context about that document or process while
+              remaining fully deterministic and replayable from the proof
+              bundle.
+            </p>
+          </div>
 
-                <h1 className="text-4xl font-semibold leading-tight tracking-tight md:text-6xl">
-                  Deterministic Reasoning Intelligence
-                  <br />
-                  for critical systems.
-                </h1>
-
-                <p className="max-w-lg text-sm leading-relaxed text-neutral-700 md:text-base">
-                  RIC executes reasoning as a reproducible process — same input → same
-                  steps → same output — with a full proof bundle for every run. No
-                  randomness. No clocks. No drift.
-                </p>
-
-                <div className="flex flex-wrap items-center gap-3 pt-1">
-                  <span className="inline-flex items-center text-xs font-medium uppercase tracking-[0.18em] text-neutral-600 md:text-[11px]">
-                    Demos&nbsp;→
-                  </span>
-
-                  <Link
-                    href="/reason"
-                    className="inline-flex items-center justify-center rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-                  >
-                    Reasoning
-                  </Link>
-                  <Link
-                    href="/demo"
-                    className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
-                  >
-                    Legality
-                  </Link>
-                  <Link
-                    href="/stem"
-                    className="inline-flex items-center justify-center rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-neutral-50"
-                  >
-                    STEM
-                  </Link>
-                </div>
-              </div>
-
-              {/* Feature cards – responsive wide pills */}
-               <div className="mt-4 grid w-full flex-1 min-w-[260px] gap-3 text-xs text-neutral-800 md:mt-0 md:text-sm">
-                <div className="flex min-h-[72px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/80 px-4 py-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                    Reproducible computation
-                  </p>
-                  <p className="leading-snug">
-                    Fixed-point Q32 engine with bit-for-bit identical replay across
-                    machines and environments.
-                  </p>
-                </div>
-                <div className="flex min-h-[72px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/80 px-4 py-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                    Deterministic reasoning
-                  </p>
-                  <p className="leading-snug">
-                    Every decision is a structured chain of reasoning with step
-                    hashes, legality checks, and graph-anchored proofs.
-                  </p>
-                </div>
-                <div className="flex min-h-[72px] flex-col justify-between rounded-2xl border border-neutral-200 bg-white/80 px-4 py-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                    Infrastructure ready
-                  </p>
-                  <p className="leading-snug">
-                    Pure JSON API, CPU-only. Fits Terraform, Kubernetes, CI pipelines,
-                    and edge deployments.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Architecture strip */}
-          <section className="rounded-3xl bg-neutral-900 px-5 py-5 text-neutral-50 md:px-7 md:py-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <p className="max-w-xs text-xs font-medium uppercase tracking-[0.26em] text-neutral-400">
-                Architecture at a glance
-              </p>
-              <div className="grid flex-1 gap-3 text-xs md:grid-cols-3 md:text-sm">
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-300">
-                    Deterministic core
-                  </p>
-                  <p className="leading-snug text-neutral-100">
-                    No randomness, no hidden clocks, no non-deterministic branches.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-300">
-                    Tamper-evident
-                  </p>
-                  <p className="leading-snug text-neutral-100">
-                    Hash-linked steps, graphs, and bundles make retroactive edits
-                    detectable.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-3">
-                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-300">
-                    Efficient runtime
-                  </p>
-                  <p className="leading-snug text-neutral-100">
-                    Q32 fixed-point numerics, CPU-only. Practical on servers and
-                    constrained hardware.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Why + where */}
-          <section className="grid gap-6 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-            {/* Why deterministic reasoning */}
-            <div className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <h2 className="text-base font-semibold md:text-lg">
-                For systems where “probably correct” is not enough.
+          {/* Engine row: input + result */}
+          <div className="mb-10 flex flex-col gap-8 lg:flex-row">
+            {/* Left: input */}
+            <div className="flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+              <h2 className="text-sm font-medium text-neutral-900">
+                Try the deterministic AGI loop
               </h2>
-              <p className="text-sm leading-relaxed text-neutral-700">
-                Many workflows rely on opaque probabilistic systems. That fails in
-                environments where outcomes must be explained, replayed, and trusted
-                over long horizons. RIC provides deterministic reasoning as
-                infrastructure: every decision has a traceable origin and a
-                reproducible proof.
-              </p>
-              <div className="grid gap-3 text-sm text-neutral-700 md:grid-cols-2">
-                <div className="space-y-1">
-                  <p className="font-medium">Infrastructure &amp; reliability</p>
-                  <p className="text-xs leading-relaxed md:text-sm">
-                    Stable reasoning chains behind configuration, routing, and
-                    failover logic.
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="font-medium">Security &amp; safety</p>
-                  <p className="text-xs leading-relaxed md:text-sm">
-                    Gate sensitive actions behind deterministic constraints and
-                    replayable justification.
-                  </p>
-                </div>
-              </div>
-              <details className="text-xs text-neutral-600 md:text-sm">
-                <summary className="cursor-pointer select-none text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-500">
-                  See more environments
-                </summary>
-                <div className="mt-2 space-y-1.5">
-                  <p>• Regulatory stacks requiring full audit trails.</p>
-                  <p>• Long-lived infra where drift breaks guarantees.</p>
-                  <p>• Multi-party systems that must agree on outcomes.</p>
-                </div>
-              </details>
-            </div>
-
-            {/* Where RIC runs */}
-            <div className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <h3 className="text-base font-semibold md:text-lg">
-                Where this runtime fits.
-              </h3>
-              <div className="grid gap-3 text-xs text-neutral-700 md:text-sm">
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <p className="font-medium">Cloud &amp; infra control</p>
-                  <p className="mt-1 leading-snug">
-                    Deterministic policies for routing, rate-limits, and failover
-                    logic.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <p className="font-medium">Robotics &amp; automation</p>
-                  <p className="mt-1 leading-snug">
-                    Explainable control decisions with full traceability per action.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <p className="font-medium">STEM &amp; simulation</p>
-                  <p className="mt-1 leading-snug">
-                    ODEs and linear algebra without floating-point drift or hidden
-                    state.
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <p className="font-medium">Embedded &amp; edge</p>
-                  <p className="mt-1 leading-snug">
-                    Low-power deterministic reasoning with auditable decisions.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Proof bundle section */}
-          <section className="rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-              <div className="max-w-md space-y-2">
-                <h2 className="text-base font-semibold md:text-lg">
-                  Every run is a proof-bundled reasoning trace.
-                </h2>
-                <p className="text-sm leading-relaxed text-neutral-700">
-                  RIC treats reasoning as a first-class artifact. Each call returns a
-                  deterministic bundle you can store, replay, and audit.
-                </p>
-              </div>
-              <div className="grid flex-1 gap-2 text-xs text-neutral-800 md:grid-cols-2 md:text-sm">
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <ul className="space-y-1 leading-snug">
-                    <li>• Ordered sequence of reasoning steps.</li>
-                    <li>• Legality view over each step.</li>
-                    <li>• Hash-linked graph of the reasoning flow.</li>
-                  </ul>
-                </div>
-                <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-3">
-                  <ul className="space-y-1 leading-snug">
-                    <li>• Bundle hash committing to the full run.</li>
-                    <li>• Deterministic result derived from that bundle.</li>
-                    <li>• Replay guarantees across machines and time.</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Example surfaces */}
-          <section className="grid w-full gap-6 md:grid-cols-2">
-            {/* Legality card */}
-            <section className="space-y-3 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Deterministic legality
-              </p>
-              <h2 className="text-base font-semibold">
-                A deterministic gate in front of any decision engine.
-              </h2>
-              <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC can sit between your application and any proposal source. The
-                proposal is checked against hard constraints and contradiction rules;
-                RIC either passes or blocks it with a fully replayable justification.
-                The legality demo is a simple surface of a deeper legality stack.
-              </p>
-              <div className="flex flex-wrap gap-3 text-xs">
-                <Link
-                  href="/legality-demo"
-                  className="text-neutral-900 underline underline-offset-2"
-                >
-                  Read the legality overview →
-                </Link>
-                <Link
-                  href="/demo"
-                  className="text-neutral-900 underline underline-offset-2"
-                >
-                  Open the live demo →
-                </Link>
-              </div>
-            </section>
-
-            {/* STEM card */}
-            <section className="space-y-3 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Deterministic STEM
-              </p>
-              <h2 className="text-base font-semibold">
-                STEM on top of the same deterministic core.
-              </h2>
-              <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC-STEM exposes linear ODE solving and linear system solving on the
-                same fixed-point Q32 substrate, with metrics available at{" "}
-                <code className="rounded bg-neutral-100 px-1 py-[1px] text-[11px]">
-                  GET /metrics
-                </code>
-                . It is a focused example of the broader runtime, chosen because its
-                results are straightforward to verify and compare.
-              </p>
-              <div className="flex flex-wrap gap-3 text-xs">
-                <Link
-                  href="/stem"
-                  className="text-neutral-900 underline underline-offset-2"
-                >
-                  Try the deterministic STEM demo →
-                </Link>
-                <Link
-                  href="/ric-stem"
-                  className="text-neutral-900 underline underline-offset-2"
-                >
-                  Read the STEM overview →
-                </Link>
-              </div>
-            </section>
-          </section>
-
-          {/* API access + integration */}
-          <section className="grid w-full gap-6 md:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-            {/* API access */}
-            <section className="space-y-3 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                API access
-              </p>
-              <h2 className="text-base font-semibold">Request access to the RIC API.</h2>
-              <p className="text-xs leading-relaxed text-neutral-700 md:text-sm">
-                RIC is in limited pilot as deterministic reasoning infrastructure for
-                infrastructure control, safety systems, STEM workflows, and embedded
-                automation. Share your email and a brief description of your
-                environment to discuss integration.
+              <p className="mt-2 text-xs leading-relaxed text-neutral-600">
+                Provide a document id, run id, and a short natural-language
+                description of the situation the agent is deciding over. For a
+                given <span className="font-mono">docId</span>, the engine can
+                carry forward world facts and memory across related runs.
               </p>
 
-              <form
-                action="https://formspree.io/f/mvgbybpa"
-                method="POST"
-                className="mt-2 space-y-3"
-              >
-                <input type="text" name="_gotcha" className="hidden" />
+              <div className="mt-4 space-y-3">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div>
+                    <label
+                      htmlFor="doc-id"
+                      className="block text-xs font-medium text-neutral-700"
+                    >
+                      docId
+                    </label>
+                    <input
+                      id="doc-id"
+                      value={docId}
+                      onChange={(e) => setDocId(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                    />
+                  </div>
+                  <div>
+                    <label
+                      htmlFor="run-id"
+                      className="block text-xs font-medium text-neutral-700"
+                    >
+                      runId
+                    </label>
+                    <input
+                      id="run-id"
+                      value={runId}
+                      onChange={(e) => setRunId(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                    />
+                  </div>
+                </div>
 
-                <div className="space-y-1">
+                <div>
                   <label
-                    htmlFor="email"
+                    htmlFor="agi-text"
                     className="block text-xs font-medium text-neutral-700"
                   >
-                    Work email
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    placeholder="you@company.com"
-                    className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label
-                    htmlFor="usecase"
-                    className="block text-xs font-medium text-neutral-700"
-                  >
-                    Brief environment / use case (optional)
+                    Input text
                   </label>
                   <textarea
-                    id="usecase"
-                    name="message"
-                    rows={3}
-                    placeholder="e.g., infra control, safety gating, STEM workflows, embedded agent."
-                    className="w-full rounded-xl border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-neutral-900"
+                    id="agi-text"
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    rows={4}
+                    className="mt-1 w-full rounded-xl border border-neutral-300 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                   />
                 </div>
 
-                <input
-                  type="hidden"
-                  name="_subject"
-                  value="New RIC API access request"
-                />
-                <input type="hidden" name="_next" value="/thanks" />
-
                 <button
-                  type="submit"
-                  className="inline-flex items-center justify-center rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                  type="button"
+                  onClick={handleRun}
+                  disabled={loading}
+                  className="inline-flex items-center justify-center rounded-full bg-neutral-900 px-4 py-2 text-xs font-medium text-white shadow-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-400"
                 >
-                  Request API access
+                  {loading
+                    ? "Running deterministic AGI…"
+                    : "Run deterministic AGI"}
                 </button>
 
-                <p className="text-[11px] text-neutral-500">
-                  No bulk mail. Only RIC integration follow-ups.
-                </p>
-              </form>
-            </section>
+                {error && (
+                  <p className="text-xs text-red-600">{error}</p>
+                )}
 
-            {/* Integration surfaces */}
-            <section className="space-y-3 rounded-3xl border border-neutral-200 bg-white p-5 shadow-sm md:p-6">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Integration
-              </p>
-              <h2 className="text-base font-semibold">
-                Slot into existing stacks with minimal friction.
+                <p className="text-[11px] text-neutral-500">
+                  The engine uses RIC-Core’s PAS_h scoring, legality stack, and
+                  proof bundles under the hood.
+                </p>
+              </div>
+            </div>
+
+            {/* Right: result */}
+            <div className="flex-1 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-5">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-xs font-semibold text-neutral-900">
+                  Last AGI run
+                </h3>
+                {result && (
+                  <span className="rounded-full bg-neutral-900/5 px-2 py-0.5 text-[10px] font-medium text-neutral-800">
+                    Deterministic choice
+                  </span>
+                )}
+              </div>
+
+              {!result && !loading && (
+                <p className="mt-3 text-xs leading-relaxed text-neutral-600">
+                  Run the demo to see a deterministic AGI decision over your
+                  input. For identical input and world state, the id, version,
+                  and bundle hash remain identical.
+                </p>
+              )}
+
+              {loading && (
+                <p className="mt-3 text-xs leading-relaxed text-neutral-600">
+                  Executing deterministic AGI loop on your input…
+                </p>
+              )}
+
+              {result && (
+                <div className="mt-3 space-y-4 text-[11px] text-neutral-700">
+                  {/* Core identifiers */}
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-medium text-neutral-900">
+                        Engine id:
+                      </span>
+                      <span className="font-mono break-all text-[10px]">
+                        {result.id}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-medium text-neutral-900">
+                        Version:
+                      </span>
+                      <span className="font-mono text-[10px]">
+                        {result.version}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <span className="font-medium text-neutral-900">
+                        Bundle hash:
+                      </span>
+                      <span className="font-mono break-all text-[10px]">
+                        {result.bundleHash}
+                      </span>
+                    </div>
+                  </div>
+
+                  {result?.chosen?.id === "not_trained" && (
+                    <div className="rounded-xl bg-red-50 border border-red-200 p-3">
+                      <p className="text-[11px] font-medium text-red-800">
+                        Engine not trained on this domain. It refused to guess.
+                      </p>
+                      <p className="mt-1 text-[11px] text-red-700">
+                        PAS_h was below threshold. Provide examples to train it.
+                      </p>
+                      <pre className="mt-2 text-[10px] bg-red-100 p-2 rounded overflow-auto">
+                        {JSON.stringify(
+                          result?.world?.trainingHints ?? [],
+                          null,
+                          2
+                        )}
+                      </pre>
+                    </div>
+                  )}
+
+                  {/* Chosen action */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Deterministic choice
+                    </p>
+
+                    <div className="space-y-1 text-[11px] text-neutral-700">
+                      <div>
+                        <span className="font-medium text-neutral-900">
+                          Chosen action:
+                        </span>{" "}
+                        {result.chosen?.id ?? "(none)"}
+                      </div>
+                      <div>
+                        <span className="font-medium text-neutral-900">
+                          Label:
+                        </span>{" "}
+                        {result.chosen?.label ?? "(n/a)"}
+                      </div>
+                      <div>
+                        <span className="font-medium text-neutral-900">
+                          PAS_h score:
+                        </span>{" "}
+                        {result.chosen?.pasScore ?? "(n/a)"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-neutral-600">
+                    Internal PAS_h (raw Q32):{" "}
+                    <span className="font-mono">
+                      {result.pasRaw ?? "(n/a)"}
+                    </span>
+                  </div>
+
+                  {/* Candidate scores */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Candidate actions
+                    </p>
+
+                    <div className="max-h-40 overflow-auto space-y-1">
+                      {result.candidates?.map((c) => (
+                        <div
+                          key={c.id}
+                          className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
+                        >
+                          <div className="flex justify-between">
+                            <span className="font-medium">{c.id}</span>
+                            <span className="font-mono">{c.pasScore}</span>
+                          </div>
+                          <p className="text-neutral-700">{c.description}</p>
+                        </div>
+                      ))}
+                      {!result.candidates?.length && (
+                        <p className="text-[11px] text-neutral-600">
+                          No candidate list returned for this run.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Legality stack */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Legality stack (RIC-Core)
+                    </p>
+
+                    <pre className="max-h-40 overflow-auto rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug">
+                      {JSON.stringify(result.legality, null, 2)}
+                    </pre>
+                  </div>
+
+                  {/* Reasoning steps (from bundle.trace) */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Reasoning steps (first 10)
+                    </p>
+
+                    <div className="max-h-64 overflow-auto space-y-1">
+                      {traceSteps.slice(0, 10).map((s: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
+                        >
+                          <div className="flex justify-between">
+                            <span className="uppercase text-neutral-700">
+                              {s.phase ?? s.kind ?? "STEP"}
+                            </span>
+                            {"tick" in s && (
+                              <span className="font-mono text-neutral-500">
+                                tick {s.tick}
+                              </span>
+                            )}
+                          </div>
+                          {s.label && (
+                            <p className="text-neutral-800">{s.label}</p>
+                          )}
+                          {s.proofHash && (
+                            <p className="mt-1 font-mono text-[9px] text-neutral-500">
+                              {s.proofHash}
+                            </p>
+                          )}
+                        </div>
+                      ))}
+                      {!traceSteps.length && (
+                        <p className="text-[11px] text-neutral-600">
+                          No reasoning steps were returned for this run.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Graph edges (from bundle.graph) */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Graph edges
+                    </p>
+
+                    <div className="max-h-40 overflow-auto space-y-1">
+                      {graphEdges.map((e: any, i: number) => (
+                        <div
+                          key={i}
+                          className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
+                        >
+                          <span className="font-mono text-neutral-900">
+                            {e.from} → {e.to}
+                          </span>
+                        </div>
+                      ))}
+                      {!graphEdges.length && (
+                        <p className="text-[11px] text-neutral-600">
+                          No graph edges returned for this run.
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Raw response */}
+                  <div className="border-t border-neutral-200 pt-3">
+                    <p className="mb-2 text-[11px] font-medium text-neutral-900">
+                      Raw response (debug)
+                    </p>
+                    <pre className="max-h-64 overflow-auto rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug">
+                      {JSON.stringify(result, null, 2)}
+                    </pre>
+                  </div>
+
+                  <p className="text-[11px] text-neutral-600">
+                    Full proof bundle (reasoning graph, legality, and hashes) is
+                    generated inside RIC-Core and exposed here through the AGI
+                    endpoint.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Context cards below engine */}
+          <div className="grid gap-4 md:grid-cols-3">
+            {/* Examples */}
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+              <h2 className="text-sm font-medium text-neutral-900">
+                Examples to try
               </h2>
-              <ul className="space-y-2 text-xs leading-relaxed text-neutral-700 md:text-sm">
+              <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
+                Quick cases that show world facts, contradictions, and the
+                chosen action.
+              </p>
+              <ul className="mt-3 space-y-2 text-[11px] font-mono">
                 <li>
-                  • JSON in/out over HTTP. Works cleanly with FastAPI, Flask, Express,
-                  Go, Rust, Java, and more.
+                  •{" "}
+                  <span className="text-neutral-900">
+                    small clean claim with 5000 in damage and no fraud
+                  </span>{" "}
+                  → <span className="font-semibold">auto_approve</span>
                 </li>
                 <li>
-                  • Compatible with containerized deployments: Docker, Kubernetes,
-                  Terraform, and common CI setups.
+                  •{" "}
+                  <span className="text-neutral-900">
+                    claim with fraud flag and high-risk band
+                  </span>{" "}
+                  → <span className="font-semibold">escalate</span>
                 </li>
                 <li>
-                  • Designed to run alongside existing models or engines as a
-                  deterministic reasoning and legality layer.
+                  •{" "}
+                  <span className="text-neutral-900">
+                    claim says approved but also denied
+                  </span>{" "}
+                  →{" "}
+                  <span className="font-semibold">
+                    escalate (contradiction)
+                  </span>
                 </li>
                 <li>
-                  • Stable schemas suitable for long-lived compliance and audit
-                  pipelines.
+                  •{" "}
+                  <span className="text-neutral-900">
+                    information missing about damage amount
+                  </span>{" "}
+                  →{" "}
+                  <span className="font-semibold">request_more_info</span>
                 </li>
               </ul>
-            </section>
-          </section>
-
-          {/* Footer */}
-          <footer className="mt-6 flex w-full flex-col items-center justify-between gap-2 border-t border-neutral-200 pt-4 text-[11px] text-neutral-500 md:mt-8 md:flex-row">
-            <span>© {new Date().getFullYear()} Resonance Intelligence Core</span>
-            <div className="flex flex-wrap gap-3">
-              <Link
-                href="/reason"
-                className="underline underline-offset-2 hover:text-neutral-700"
-              >
-                Reasoning demo
-              </Link>
-              <Link
-                href="/stem"
-                className="underline underline-offset-2 hover:text-neutral-700"
-              >
-                RIC-STEM v1
-              </Link>
-              <Link
-                href="/demo"
-                className="underline underline-offset-2 hover:text-neutral-700"
-              >
-                Legality demo
-              </Link>
             </div>
-          </footer>
-        </section>
-      </div>
+
+            {/* API usage */}
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+              <h3 className="text-sm font-medium text-neutral-900">
+                API access
+              </h3>
+              <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
+                The UI calls the same deterministic AGI endpoint your systems
+                can use.
+              </p>
+              <pre className="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug overflow-auto">
+                {`POST /api/agi-run
+Content-Type: application/json
+
+{
+  "docId": "your-doc-id",
+  "runId": "your-run-id",
+  "text": "domain description or situation here",
+  "goals": []
+}`}
+              </pre>
+              <p className="mt-2 text-[11px] text-neutral-700">
+                Response includes{" "}
+                <span className="font-mono">id</span>,{" "}
+                <span className="font-mono">version</span>,{" "}
+                <span className="font-mono">bundleHash</span>, candidate PAS_h
+                scores, legality, world facts, and the reasoning graph.
+              </p>
+              <p className="mt-2 text-[11px] text-neutral-600">
+                Use the top navigation to return to the{" "}
+                <Link
+                  href="/"
+                  className="underline underline-offset-2 hover:text-neutral-900"
+                >
+                  home page
+                </Link>{" "}
+                or other demos.
+              </p>
+            </div>
+
+            {/* Energy + security / replay */}
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+              <h3 className="text-sm font-medium text-neutral-900">
+                Energy, security, replay
+              </h3>
+              <ul className="mt-2 space-y-2 text-[11px] text-neutral-600 leading-relaxed">
+                <li>
+                  • Fixed-point Q32 arithmetic, zero stochastic sampling, no
+                  embeddings or transformers, no model weights.
+                </li>
+                <li>
+                  • A single AGI decision typically runs in a few ms on one
+                  vCPU and uses an estimated ~3–5 joules per thousand runs.
+                </li>
+                <li>
+                  • Every run emits a proof bundle: trace, graph, legality, and
+                  hashes. Same input and world state → same decision on replay.
+                </li>
+                <li>
+                  • Security at the bundle level: decisions are
+                  tamper-evident, tied to bundle hashes, and auditable without
+                  exposing private text outside your boundary.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

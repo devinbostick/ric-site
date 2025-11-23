@@ -312,6 +312,20 @@ export default function AgiPage() {
                     </div>
                   </div>
 
+                  {result?.chosen?.id === "not_trained" && (
+                    <div className="rounded-xl bg-red-50 border border-red-200 p-3">
+                      <p className="text-[11px] font-medium text-red-800">
+                        Engine not trained on this domain. It refused to guess.
+                      </p>
+                      <p className="mt-1 text-[11px] text-red-700">
+                        PAS_h was below threshold. Provide examples to train it.
+                      </p>
+                      <pre className="mt-2 text-[10px] bg-red-100 p-2 rounded">
+                        {JSON.stringify(result?.world?.trainingHints, null, 2)}
+                      </pre>
+                    </div>
+                  )}
+
                   {/* Chosen action */}
                   <div className="border-t border-neutral-200 pt-3">
                     <p className="mb-2 text-[11px] font-medium text-neutral-900">
@@ -338,6 +352,11 @@ export default function AgiPage() {
                         {result.chosen?.pasScore ?? "(n/a)"}
                       </div>
                     </div>
+                  </div>
+
+                  <div className="text-[11px] text-neutral-600">
+                    Internal PAS_h (raw Q32):{" "}
+                    <span className="font-mono">{result.pasRaw}</span>
                   </div>
 
                   {/* Candidate scores */}
@@ -520,7 +539,7 @@ export default function AgiPage() {
                 can use.
               </p>
               <pre className="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug overflow-auto">
-{`POST /api/agi-run
+                {`POST /api/agi-run
 Content-Type: application/json
 
 {
