@@ -149,7 +149,7 @@ export default function AgiPage() {
       <section className="border-b border-neutral-200 bg-neutral-50">
         <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           {/* Hero row */}
-          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="max-w-xl space-y-3">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
                 Deterministic action selection
@@ -163,20 +163,126 @@ export default function AgiPage() {
                 actions, and chooses the maximally coherent one. Same input,
                 same world facts, same choice every time.
               </p>
+              <p className="text-xs leading-relaxed text-neutral-600">
+                For a given <span className="font-mono">docId</span>, the
+                engine can accumulate world facts, goals, and memory over
+                multiple runs. That lets it learn more context about that
+                document or process while remaining fully deterministic and
+                replayable from the proof bundle.
+              </p>
             </div>
 
-            <div className="rounded-2xl border border-neutral-200 bg-white p-3 text-xs text-neutral-700 shadow-sm md:w-64">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-neutral-500">
-                Quick start
-              </p>
-              <p className="mt-2 leading-snug">
-                1. Keep the text short (one decision).
-                <br />
-                2. Run once, note the chosen action and bundle hash.
-                <br />
-                3. Run again with the same input — the choice and hash stay
-                fixed.
-              </p>
+            {/* Context / examples / API / energy / security */}
+            <div className="mt-4 flex max-w-xs flex-col gap-4 md:mt-0 md:w-80">
+              {/* Examples */}
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+                <h2 className="text-sm font-medium text-neutral-900">
+                  Examples to try
+                </h2>
+                <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
+                  These show how the engine builds world facts, detects
+                  contradictions, and picks the maximally coherent action.
+                </p>
+                <ul className="mt-3 space-y-2 text-[11px] font-mono">
+                  <li>
+                    •{" "}
+                    <span className="text-neutral-900">
+                      small clean claim with 5000 in damage and no fraud
+                    </span>{" "}
+                    → <span className="font-semibold">auto_approve</span>
+                  </li>
+                  <li>
+                    •{" "}
+                    <span className="text-neutral-900">
+                      claim with fraud flag and high-risk band
+                    </span>{" "}
+                    → <span className="font-semibold">escalate</span>
+                  </li>
+                  <li>
+                    •{" "}
+                    <span className="text-neutral-900">
+                      claim says approved but also denied
+                    </span>{" "}
+                    →{" "}
+                    <span className="font-semibold">
+                      escalate (contradiction)
+                    </span>
+                  </li>
+                  <li>
+                    •{" "}
+                    <span className="text-neutral-900">
+                      information missing about damage amount
+                    </span>{" "}
+                    →{" "}
+                    <span className="font-semibold">
+                      request_more_info
+                    </span>
+                  </li>
+                </ul>
+              </div>
+
+              {/* API usage */}
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+                <h3 className="text-sm font-medium text-neutral-900">
+                  API access
+                </h3>
+                <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
+                  The UI calls the same deterministic AGI endpoint your systems
+                  can use directly.
+                </p>
+                <pre className="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug overflow-auto">
+{`POST /api/agi-run
+Content-Type: application/json
+
+{
+  "docId": "your-doc-id",
+  "runId": "your-run-id",
+  "text": "domain description or situation here",
+  "goals": []
+}`}
+                </pre>
+                <p className="mt-2 text-[11px] text-neutral-700">
+                  Response includes: <span className="font-mono">id</span>,{" "}
+                  <span className="font-mono">version</span>,{" "}
+                  <span className="font-mono">bundleHash</span>, candidate
+                  PAS_h scores, legality, world facts, and the reasoning graph.
+                </p>
+                <p className="mt-2 text-[11px] text-neutral-600">
+                  Use the top navigation to return to the{" "}
+                  <Link
+                    href="/"
+                    className="underline underline-offset-2 hover:text-neutral-900"
+                  >
+                    home page
+                  </Link>{" "}
+                  or other demos.
+                </p>
+              </div>
+
+              {/* Energy + security / replay */}
+              <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-xs text-neutral-700 shadow-sm">
+                <h3 className="text-sm font-medium text-neutral-900">
+                  Energy, security, replay
+                </h3>
+                <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
+                  RIC-Core runs in fixed-point Q32 arithmetic with zero
+                  stochastic sampling, no embeddings, no transformers, and no
+                  model weights. A single AGI decision typically executes in
+                  a few milliseconds on one vCPU and uses an estimated ~3–5
+                  joules per thousand runs.
+                </p>
+                <p className="mt-2 text-[11px] text-neutral-600 leading-relaxed">
+                  Every run produces a proof bundle with hashes over the trace,
+                  graph, and legality stack. Given the same input and world
+                  state, you can replay the bundle and verify that the same
+                  decision is produced, step by step.
+                </p>
+                <p className="mt-2 text-[11px] text-neutral-600 leading-relaxed">
+                  Security is handled at the bundle level: decisions are
+                  tamper-evident, tied to bundle hashes, and can be logged and
+                  audited without exposing private text outside your boundary.
+                </p>
+              </div>
             </div>
           </div>
 
@@ -188,7 +294,9 @@ export default function AgiPage() {
               </h2>
               <p className="mt-2 text-xs leading-relaxed text-neutral-600">
                 Provide a document id, run id, and a short natural-language
-                description of the situation the agent is deciding over.
+                description of the situation the agent is deciding over. For a
+                given <span className="font-mono">docId</span>, the engine can
+                carry forward world facts and memory across related runs.
               </p>
 
               <div className="mt-4 space-y-3">
@@ -251,9 +359,7 @@ export default function AgiPage() {
                 </button>
 
                 {error && (
-                  <p className="text-xs text-red-600">
-                    {error}
-                  </p>
+                  <p className="text-xs text-red-600">{error}</p>
                 )}
 
                 <p className="text-[11px] text-neutral-500">
@@ -337,7 +443,7 @@ export default function AgiPage() {
                         <span className="font-medium text-neutral-900">
                           Label:
                         </span>{" "}
-                          {result.chosen?.label ?? "(n/a)"}
+                        {result.chosen?.label ?? "(n/a)"}
                       </div>
                       <div>
                         <span className="font-medium text-neutral-900">
@@ -462,7 +568,7 @@ export default function AgiPage() {
                   </div>
 
                   <p className="text-[11px] text-neutral-600">
-                    Full proof bundle (reasoning graph, legality, hashes) is
+                    Full proof bundle (reasoning graph, legality, and hashes) is
                     generated inside RIC-Core and exposed here through the AGI
                     endpoint.
                   </p>
