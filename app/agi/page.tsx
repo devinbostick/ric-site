@@ -1,29 +1,56 @@
+// app/agi/page.tsx
 "use client";
 
 import React, { useState } from "react";
 import Link from "next/link";
 
+type AgiChoice = {
+  id: string;
+  label: string;
+  description: string;
+  pasScore: number;
+};
+
 type AgiRunResponse = {
-  ok: boolean;
   id: string;
   version: string;
   bundleHash: string;
-  choiceId?: string;
-  choiceLabel?: string;
-  choiceScore?: number;
-  candidates?: any[];
-  legality?: any;
-  steps?: any[];
-  graph?: {
-    nodes?: any[];
-    edges?: any[];
+  bundle?: {
+    version: string;
+    codeHash: string;
+    trace: {
+      id: string;
+      steps: any[];
+    };
+    graph: {
+      version: string;
+      nodes: any[];
+      edges: any[];
+      [k: string]: any;
+    };
+    graphHash: string;
+    bundleHash: string;
     [k: string]: any;
+  };
+  legality?: any | null;
+  chosen?: AgiChoice;
+  candidates?: AgiChoice[];
+  world?: {
+    tick: number;
+    facts: { key: string; value: any }[];
+    storeHash: string;
+    goals: any[];
+    memory: { steps: any[] };
+    entities: any[];
+    events: any[];
+    roles: any[];
+    timeline: any[];
   };
   [k: string]: any;
 };
 
 export default function AgiPage() {
-  const [text, setText] = useState("Auto-approve small, clean claims.");
+  const [text, setText] = useState("small clean claim with no fraud flags");
   const [docId, setDocId] = useState("doc-helix");
   const [runId, setRunId] = useState("run-1");
   const [loading, setLoading] = useState(false);
@@ -45,7 +72,12 @@ export default function AgiPage() {
       const res = await fetch("/api/agi-run", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ docId, runId, text: t }),
+        body: JSON.stringify({
+          docId,
+          runId,
+          text: t,
+          goals: [],
+        }),
       });
 
       if (!res.ok) {
@@ -61,6 +93,9 @@ export default function AgiPage() {
       setLoading(false);
     }
   }
+
+  const traceSteps = result?.bundle?.trace?.steps ?? [];
+  const graphEdges = result?.bundle?.graph?.edges ?? [];
 
   return (
     <main className="min-h-screen bg-white text-neutral-900">
@@ -296,19 +331,19 @@ export default function AgiPage() {
                         <span className="font-medium text-neutral-900">
                           Chosen action:
                         </span>{" "}
-                        {result.choiceId ?? "(none)"}
+                        {result.chosen?.id ?? "(none)"}
                       </div>
                       <div>
                         <span className="font-medium text-neutral-900">
-                          Description:
+                          Label:
                         </span>{" "}
-                        {result.choiceLabel ?? "(n/a)"}
+                          {result.chosen?.label ?? "(n/a)"}
                       </div>
                       <div>
                         <span className="font-medium text-neutral-900">
                           PAS_h score:
                         </span>{" "}
-                        {result.choiceScore ?? "(n/a)"}
+                        {result.chosen?.pasScore ?? "(n/a)"}
                       </div>
                     </div>
                   </div>
@@ -320,16 +355,16 @@ export default function AgiPage() {
                     </p>
 
                     <div className="max-h-40 overflow-auto space-y-1">
-                      {result.candidates?.map((c: any) => (
+                      {result.candidates?.map((c) => (
                         <div
                           key={c.id}
                           className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
                         >
                           <div className="flex justify-between">
                             <span className="font-medium">{c.id}</span>
-                            <span className="font-mono">{c.score}</span>
+                            <span className="font-mono">{c.pasScore}</span>
                           </div>
-                          <p className="text-neutral-700">{c.label}</p>
+                          <p className="text-neutral-700">{c.description}</p>
                         </div>
                       ))}
                       {!result.candidates?.length && (
@@ -351,27 +386,31 @@ export default function AgiPage() {
                     </pre>
                   </div>
 
-                  {/* Reasoning steps */}
+                  {/* Reasoning steps (from bundle.trace) */}
                   <div className="border-t border-neutral-200 pt-3">
                     <p className="mb-2 text-[11px] font-medium text-neutral-900">
                       Reasoning steps (first 10)
                     </p>
 
                     <div className="max-h-64 overflow-auto space-y-1">
-                      {result.steps?.slice(0, 10).map((s: any, i: number) => (
+                      {traceSteps.slice(0, 10).map((s: any, i: number) => (
                         <div
                           key={i}
                           className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
                         >
                           <div className="flex justify-between">
                             <span className="uppercase text-neutral-700">
-                              {s.phase}
+                              {s.phase ?? s.kind ?? "STEP"}
                             </span>
-                            <span className="font-mono text-neutral-500">
-                              tick {s.tick}
-                            </span>
+                            {"tick" in s && (
+                              <span className="font-mono text-neutral-500">
+                                tick {s.tick}
+                              </span>
+                            )}
                           </div>
-                          <p className="text-neutral-800">{s.label}</p>
+                          {s.label && (
+                            <p className="text-neutral-800">{s.label}</p>
+                          )}
                           {s.proofHash && (
                             <p className="mt-1 font-mono text-[9px] text-neutral-500">
                               {s.proofHash}
@@ -379,7 +418,7 @@ export default function AgiPage() {
                           )}
                         </div>
                       ))}
-                      {!result.steps?.length && (
+                      {!traceSteps.length && (
                         <p className="text-[11px] text-neutral-600">
                           No reasoning steps were returned for this run.
                         </p>
@@ -387,14 +426,14 @@ export default function AgiPage() {
                     </div>
                   </div>
 
-                  {/* Graph edges */}
+                  {/* Graph edges (from bundle.graph) */}
                   <div className="border-t border-neutral-200 pt-3">
                     <p className="mb-2 text-[11px] font-medium text-neutral-900">
                       Graph edges
                     </p>
 
                     <div className="max-h-40 overflow-auto space-y-1">
-                      {result.graph?.edges?.map((e: any, i: number) => (
+                      {graphEdges.map((e: any, i: number) => (
                         <div
                           key={i}
                           className="rounded-xl border border-neutral-200 bg-neutral-50 px-3 py-2 text-[11px]"
@@ -404,7 +443,7 @@ export default function AgiPage() {
                           </span>
                         </div>
                       ))}
-                      {!result.graph?.edges?.length && (
+                      {!graphEdges.length && (
                         <p className="text-[11px] text-neutral-600">
                           No graph edges returned for this run.
                         </p>
@@ -424,8 +463,8 @@ export default function AgiPage() {
 
                   <p className="text-[11px] text-neutral-600">
                     Full proof bundle (reasoning graph, legality, hashes) is
-                    generated inside RIC-Core and can be exposed as a separate
-                    endpoint if needed.
+                    generated inside RIC-Core and exposed here through the AGI
+                    endpoint.
                   </p>
                 </div>
               )}
