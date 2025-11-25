@@ -46,6 +46,7 @@ type AgiRunResponse = {
     roles: any[];
     timeline: any[];
   };
+  pasRaw?: number; // ← add this
   [k: string]: any;
 };
 
@@ -249,8 +250,8 @@ export default function AgiPage() {
                 )}
 
                 <p className="text-[11px] text-neutral-500">
-                  The engine uses RIC-Core’s PAS_h scoring, legality stack, and
-                  proof bundles under the hood.
+                  The engine uses RIC-Core’s legality stack and proof bundles
+                  under the hood. PAS_h integration comes in a later version.
                 </p>
               </div>
             </div>
@@ -347,17 +348,19 @@ export default function AgiPage() {
                       </div>
                       <div>
                         <span className="font-medium text-neutral-900">
-                          PAS_h score:
+                          Deterministic score:
                         </span>{" "}
                         {result.chosen?.pasScore ?? "(n/a)"}
                       </div>
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-neutral-600">
-                    Internal PAS_h (raw Q32):{" "}
-                    <span className="font-mono">{result.pasRaw}</span>
-                  </div>
+                  {result?.pasRaw !== undefined && (
+                    <div className="text-[11px] text-neutral-600">
+                      Internal deterministic score (raw Q32):{" "}
+                      <span className="font-mono">{result.pasRaw}</span>
+                    </div>
+                  )}
 
                   {/* Candidate scores */}
                   <div className="border-t border-neutral-200 pt-3">
@@ -535,8 +538,7 @@ export default function AgiPage() {
                 API access
               </h3>
               <p className="mt-1 text-[11px] text-neutral-600 leading-relaxed">
-                The UI calls the same deterministic AGI endpoint your systems
-                can use.
+                The UI calls the same deterministic AGI endpoint your systems can use.
               </p>
               <pre className="mt-3 rounded-xl bg-neutral-50 px-3 py-2 text-[10px] leading-snug overflow-auto">
                 {`POST /api/agi-run
@@ -553,8 +555,8 @@ Content-Type: application/json
                 Response includes{" "}
                 <span className="font-mono">id</span>,{" "}
                 <span className="font-mono">version</span>,{" "}
-                <span className="font-mono">bundleHash</span>, candidate PAS_h
-                scores, legality, world facts, and the reasoning graph.
+                <span className="font-mono">bundleHash</span>, deterministic candidate scores,
+                legality, world facts, and the reasoning graph.
               </p>
               <p className="mt-2 text-[11px] text-neutral-600">
                 Use the top navigation to return to the{" "}
