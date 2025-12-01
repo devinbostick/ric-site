@@ -1,4 +1,6 @@
+// app/agi/page.tsx
 import Link from "next/link";
+import HelixChat from "./HelixChat";
 
 export default function AgiPage() {
   return (
@@ -70,14 +72,14 @@ export default function AgiPage() {
               the same bundleHash, graphHash, and reasoning trace.
             </p>
             <p className="text-sm leading-relaxed text-neutral-700">
-              The console gives you a read-only view into those internals for a
-              concrete Helix claims scenario. You can run the agent, inspect the
-              world and proof bundle, and replay the same run as many times as
-              you like.
+              Below is the Helix deterministic AGI experience: a mind with a
+              fixed knowledge base about Helix, deterministic planning, and
+              verifiable proofs. Every answer is grounded in explicit facts,
+              metrics, and a replayable bundle.
             </p>
           </div>
 
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <Link
               href="/console"
               className="inline-flex items-center justify-center rounded-full border border-neutral-900 bg-neutral-900 px-4 py-2 text-xs font-medium text-white transition hover:bg-black"
@@ -85,12 +87,13 @@ export default function AgiPage() {
               Open deterministic AGI console
             </Link>
             <p className="max-w-md text-[11px] leading-snug text-neutral-600">
-              In the console, press{" "}
-              <span className="font-semibold">Run Helix scenario</span> to
-              execute a deterministic AGI run for a small, clean claim. Then
-              inspect the world, PAS_h, drift, and proof bundle.
+              The console shows the raw substrate: world state, PAS_h, drift,
+              and proof bundles. The Helix chat below is the experience layer on
+              top of that substrate.
             </p>
           </div>
+
+          <HelixChat />
         </div>
       </section>
     </main>
