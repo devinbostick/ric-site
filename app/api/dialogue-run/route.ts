@@ -4,13 +4,13 @@ const RIC_API_BASE =
   process.env.RIC_API_BASE ?? "http://127.0.0.1:8787";
 
 /**
- * POST /api/agi-run
- * Thin pass-through to RIC-Core /agi/run (for non-dialogue AGI runs).
+ * POST /api/dialogue-run
+ * Proxies directly to RIC-Core /agi/dialogue-run
  */
 export async function POST(req: NextRequest) {
   const body = await req.text();
 
-  const upstream = await fetch(`${RIC_API_BASE}/agi/run`, {
+  const upstream = await fetch(`${RIC_API_BASE}/agi/dialogue-run`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body,

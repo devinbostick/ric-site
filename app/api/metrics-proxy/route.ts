@@ -2,8 +2,11 @@
 
 import { NextResponse } from "next/server";
 
-const RIC_API_BASE =
-  process.env.RIC_API_BASE ?? "http://127.0.0.1:8787";
+// Canonical RIC base: env override, default localhost, strip trailing slashes.
+const RIC_API_BASE = (process.env.RIC_API_BASE ?? "http://127.0.0.1:8787").replace(
+  /\/+$/,
+  "",
+);
 
 export async function GET() {
   try {
@@ -25,11 +28,9 @@ export async function GET() {
     }
 
     const json = await res.json();
-
     return NextResponse.json(json, { status: 200 });
   } catch (err: unknown) {
-    const message =
-      err instanceof Error ? err.message : "Unknown error";
+    const message = err instanceof Error ? err.message : "Unknown error";
 
     return NextResponse.json(
       {

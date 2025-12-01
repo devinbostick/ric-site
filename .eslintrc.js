@@ -15,3 +15,11 @@ module.exports = {
     },
   ],
 };
+
+{
+  files: ["src/agi/**"],
+  rules: {
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-require-imports": "off",
+  },
+}
